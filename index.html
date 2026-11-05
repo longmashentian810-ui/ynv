@@ -1,287 +1,56 @@
-<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>やにぶ - 試作版2</title>
-<style>
-:root{--felt:#145c34;--felt2:#0e4828;--panel:#ffffff12}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:linear-gradient(var(--felt),var(--felt2));color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-header{padding:14px 12px;text-align:center;background:#0b3d23;position:sticky;top:0;z-index:5}
-h1{margin:0;font-size:23px}.sub{font-size:12px;opacity:.75;margin-top:3px}
-main{max-width:760px;margin:auto;padding:10px 10px 30px}
-.panel{background:var(--panel);border:1px solid #ffffff25;border-radius:16px;padding:10px;margin:8px 0}
-.title{text-align:center;font-weight:800;margin-bottom:6px}
-.handrow{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
-.card{width:52px;height:74px;background:#fff;color:#111;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:800;box-shadow:0 2px 5px #0007;user-select:none}
-.discardStack{position:relative;width:150px;height:84px;display:flex;justify-content:center;align-items:center}.discardStack .discardCard{position:absolute}.card.mine{cursor:pointer}.card.selected{transform:translateY(-8px);outline:3px solid #ffd43b}
-.card.joker{color:#7a28a8}.back{background:#243c86;color:white}
-.center{display:flex;justify-content:center;align-items:center;gap:22px;text-align:center}
-.zone small{display:block;opacity:.75;margin-bottom:5px}.count{font-size:12px;opacity:.8}
-button{border:0;border-radius:12px;padding:11px 15px;font-weight:800;font-size:15px}
-button:disabled{opacity:.4}.primary{background:#ffd43b;color:#222}.danger{background:#ff8c8c;color:#222}
-.actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
-.status{text-align:center;font-weight:800;min-height:23px}.hint{text-align:center;font-size:12px;opacity:.75;margin-top:6px}
-.log{font-size:12px;line-height:1.55;max-height:130px;overflow:auto}
-.score{font-size:12px;opacity:.8}.hand-count{display:inline-block;background:#ffd43b;color:#222;border-radius:999px;padding:4px 9px;font-size:13px;font-weight:900;margin-left:6px;white-space:nowrap}
-.modal{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
-.modalbox{background:#174f30;border:1px solid #ffffff44;border-radius:18px;padding:22px;max-width:500px;width:100%;text-align:center}
-.hidden{display:none}
-table{width:100%;border-collapse:collapse;margin:10px 0}td,th{padding:7px;border-bottom:1px solid #ffffff22}
-@media(max-width:430px){.card{width:47px;height:68px;font-size:21px}.center{gap:15px}}
-</style>
-</head>
-<body>
-<header><h1>やにぶ</h1><div class="sub">試作版｜あなた vs CPU 3人</div></header>
-<main>
-<section id="start" class="panel" style="text-align:center;padding:28px 15px">
-<h2>やにぶを始める</h2>
-<p>A=1　2〜10=数字　J=11　Q=12　K=13</p>
-<p>ジョーカーは組み合わせではワイルド、点数は0。</p>
-<button class="primary" onclick="startGame()">ゲーム開始</button>
-</section>
-
-<section id="board" class="hidden">
-<div class="panel"><div class="title">累計記録</div><div id="cumulativeScores"></div><div id="roundInfo" class="hint"></div></div>
-<div class="panel"><div class="title">CPU 1 <span id="cpu0score" class="hand-count">手札：5枚</span></div><div id="cpu0" class="handrow"></div></div>
-<div class="panel"><div class="title">CPU 2 <span id="cpu1score" class="hand-count">手札：5枚</span></div><div id="cpu1" class="handrow"></div></div>
-
-<div class="panel">
-<div class="center">
-<div class="zone"><small>山札</small><div id="deck" class="card back">🂠</div><div id="deckCount" class="count"></div></div>
-<div class="zone"><small>場（捨て札）</small><div id="discardStack" class="discardStack"></div><div id="face" class="hidden"></div></div>
-</div>
-<div id="drawActions" class="actions">
-<button onclick="takeDeck()">山札から取る</button>
-<button id="takeFaceBtn" onclick="takeFace()">捨てる直前の場札を取る</button>
-</div>
-<div id="pickupPreview" style="display:none;text-align:center;margin-top:10px"><div class="hint" style="opacity:1">今回取れる表向きカード（あなたが捨てる前から場にあったカード）</div><div id="pickupCard" class="card" style="margin:6px auto"></div></div>
-</div>
-
-<div class="panel"><div class="title">CPU 3 <span id="cpu2score" class="hand-count">手札：5枚</span></div><div id="cpu2" class="handrow"></div></div>
-
-<div class="panel">
-<div id="status" class="status"></div>
-<div class="title">あなた　<span id="myScore" class="score"></span></div>
-<div id="myHand" class="handrow"></div>
-<div class="actions">
-<button id="discardBtn" onclick="discardSelected()">選択カードを捨てる</button>
-<button id="yanivBtn" class="primary" onclick="yaniv()">ヤニブ！</button>
-</div>
-<div class="hint">捨てるカードを選択 → 捨てた後に1枚取ります。表向きから取れるのは、あなたが捨てる直前に場にあったカードです。自分が今捨てたカードは取れません。複数枚捨ては同じ数字2枚以上、または3枚以上の連番。</div>
-</div>
-<div class="panel"><div id="log" class="log"></div></div>
-</section>
-</main>
-
-<div id="result" class="modal hidden">
-<div class="modalbox">
-<h2 id="resultTitle"></h2>
-<div id="resultBody"></div>
-<button class="primary" onclick="startGame(true)">次のゲームへ（記録を継続）</button>
-</div>
-</div>
-
-<script>
-const names=["あなた","CPU 1","CPU 2","CPU 3"];
-let ps,deck,face,previousFace,discardPile,lastDiscard,turn,phase,selected,ended;
-let cumulativePaid=[0,0,0,0], roundNumber=0, roundRate=50; // 累計収支：勝者プラス、敗者マイナス
-
-const ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-function val(c){return c.joker?0:(c.r==="A"?1:c.r==="J"?11:c.r==="Q"?12:c.r==="K"?13:Number(c.r))}
-function label(c){return c.joker?"🃏":c.r}
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
-function makeDeck(){
- let d=[];
- for(const r of ranks) for(let s=0;s<4;s++) d.push({r,joker:false,id:Math.random()});
- d.push({r:"Joker",joker:true,id:Math.random()},{r:"Joker",joker:true,id:Math.random()});
- shuffle(d);return d;
-}
-function total(hand){return hand.reduce((a,c)=>a+val(c),0)}
-function writeLog(s){const e=document.getElementById("log");e.innerHTML="<div>"+s+"</div>"+e.innerHTML}
-function startGame(keepRecord=false){
- if(!keepRecord){cumulativePaid=[0,0,0,0];roundNumber=0;}
- roundNumber++;
- document.getElementById("start").classList.add("hidden");
- document.getElementById("board").classList.remove("hidden");
- document.getElementById("result").classList.add("hidden");
- ps=names.map(name=>({name,hand:[]}));
- roundRate=50;
- dealFreshHands();
- previousFace=null;discardPile=[face];lastDiscard=[face];turn=0;phase="discard";selected=new Set();ended=false;
- document.getElementById("log").innerHTML="";
- writeLog("第"+roundNumber+"ゲーム開始。点数倍率は1点差につき"+roundRate+"点です。");
- render();
-}
-function dealFreshHands(){
- // 初期場札がジョーカーなら全員の手札を回収して配り直す。ジョーカー1枚ごとに倍率+50。
- let redeals=0;
- while(true){
-  deck=makeDeck();
-  for(const p of ps)p.hand=[];
-  for(let i=0;i<5;i++)for(const p of ps)p.hand.push(deck.pop());
-  face=deck.pop();
-  if(face.joker){
-   roundRate+=50;redeals++;
-   writeLog("初期場札がジョーカー。全員の手札を回収して配り直します（倍率+50）。");
-   // 次のループで全カードを新しい山札としてシャッフルするため、現在の配札を回収。
-   const all=[];for(const p of ps)all.push(...p.hand);all.push(face);all.push(...deck);shuffle(all);deck=all;
-   // makeDeck()で作り直すと同じ構成になるため、次回配札用デッキを保持する
-   const savedMakeDeck=makeDeck;
-   // 次の周回では保持した全カードを使う処理へ移行
-   let d=deck; deck=[];
-   for(const p of ps)p.hand=[];
-   for(let i=0;i<5;i++)for(const p of ps)p.hand.push(d.pop());
-   face=d.pop();deck=d;
-   while(face.joker){
-    roundRate+=50;redeals++;
-    writeLog("配り直し後も初期場札がジョーカー（"+redeals+"枚目）。さらに配り直します（倍率+50）。");
-    const all2=[];for(const p of ps)all2.push(...p.hand);all2.push(face);all2.push(...deck);shuffle(all2);deck=all2;
-    const d2=deck;deck=[];for(const p of ps)p.hand=[];
-    for(let i=0;i<5;i++)for(const p of ps)p.hand.push(d2.pop());
-    face=d2.pop();deck=d2;
-   }
-   break;
-  }
-  break;
- }
- if(!face.joker && val(face)>=10){roundRate+=50;writeLog("初期場札が10以上（"+label(face)+"）。倍率+50。");}
- writeLog("初期場札："+label(face)+"。1点差につき"+roundRate+"点。");
-}
-function renderCumulative(){
- const e=document.getElementById("cumulativeScores");
- if(e)e.innerHTML='<table><tr><th>プレイヤー</th><th>累計収支点</th></tr>'+names.map((n,i)=>'<tr><td>'+n+'</td><td>'+(cumulativePaid[i]>0?'+':'')+cumulativePaid[i]+'点</td></tr>').join('')+'</table>';
- const r=document.getElementById("roundInfo");if(r)r.textContent='第'+roundNumber+'ゲーム｜今回の倍率：1点差につき'+roundRate+'点';
-}
-function render(){
- renderCumulative();
- document.getElementById("deckCount").textContent=deck.length+"枚";
- const fe=document.getElementById("face");fe.textContent=label(face);fe.className="card"+(face.joker?" joker":"");
-  const de=document.getElementById("discardStack"); if(de){de.innerHTML=""; const arr=(lastDiscard&&lastDiscard.length)?lastDiscard:[face]; arr.forEach((c,i)=>{const x=document.createElement("div");x.className="card discardCard"+(c.joker?" joker":"");x.textContent=label(c);x.style.transform=`translate(${i*10}px,${i*2}px)`;de.appendChild(x);});}
- document.getElementById("myScore").textContent="手札 "+total(ps[0].hand)+"点";
- const mh=document.getElementById("myHand");mh.innerHTML="";
- ps[0].hand.forEach((c,i)=>{
-  const e=document.createElement("div");e.className="card mine"+(c.joker?" joker":"")+(selected.has(i)?" selected":"");
-  e.textContent=label(c);e.onclick=()=>selectCard(i);mh.appendChild(e);
- });
- for(let n=0;n<3;n++){
-  const e=document.getElementById("cpu"+n);e.innerHTML="";
-  ps[n+1].hand.forEach(()=>{const x=document.createElement("div");x.className="card back";x.textContent="🂠";e.appendChild(x)});
-  document.getElementById("cpu"+n+"score").textContent="手札："+ps[n+1].hand.length+"枚";
- }
- const myTurn=turn===0;
- document.getElementById("status").textContent=ended?"ゲーム終了":myTurn?(phase==="draw"?"カードを1枚取ってください":"捨てるカードを選んでください"):names[turn]+"のターン";
- document.querySelectorAll("#drawActions button").forEach(b=>b.disabled=!myTurn||phase!=="draw"||ended);
- const preview=document.getElementById("pickupPreview"); const takeFaceBtn=document.getElementById("takeFaceBtn");
- if(preview){const showPickup=myTurn&&phase==="draw"&&!ended&&!!previousFace;preview.style.display=showPickup?"block":"none";if(showPickup){const pc=document.getElementById("pickupCard");pc.textContent=label(previousFace);pc.className="card"+(previousFace.joker?" joker":"");takeFaceBtn.textContent="このカード（"+label(previousFace)+"）を取る";}else{takeFaceBtn.textContent="捨てる直前の場札を取る";}}
- document.getElementById("discardBtn").disabled=!myTurn||phase!=="discard"||ended;
- document.getElementById("yanivBtn").disabled=!myTurn||phase!=="discard"||ended||total(ps[0].hand)>5;
-}
-function selectCard(i){if(turn!==0||phase!=="discard"||ended)return;selected.has(i)?selected.delete(i):selected.add(i);render()}
-function valid(cards){
- if(!cards.length)return false;if(cards.length===1)return true;
- const non=cards.filter(c=>!c.joker), jok=cards.length-non.length;
- if(non.length>0&&non.every(c=>val(c)===val(non[0])))return true;
- if(cards.length<3)return false;
- const nums=non.map(val).sort((a,b)=>a-b);
- if(new Set(nums).size!==nums.length)return false;
- for(let start=1;start<=13;start++){
-  let need=0,ok=true;
-  for(let i=0;i<cards.length;i++){let x=start+i;if(x>13){ok=false;break}if(!nums.includes(x))need++}
-  if(ok&&need===jok)return true;
- }
- return false;
-}
-function recycleDeck(){
- if(deck.length>0)return true;
- const keep=face;
- const recycle=discardPile.filter(c=>c!==keep);
- if(!recycle.length)return false;
- shuffle(recycle);
- deck=recycle;
- discardPile=[keep];
- writeLog("山札がなくなったため、表向きのカードを除いてシャッフルし、山札に戻しました。");
- return true;
-}
-function takeDeck(){
- if(!recycleDeck()){alert("山札がありません。");return}
- ps[0].hand.push(deck.pop());previousFace=null;writeLog("あなたは山札から1枚取りました。");finishDraw();
-}
-function takeFace(){
-  const take=previousFace;
-  if(!take)return;
-  ps[0].hand.push(take);
-  previousFace=null;
-  writeLog("あなたは捨てる直前の表向きカード "+label(take)+" を取りました。");
-  finishDraw();
-}
-function discardSelected(){
- const ids=[...selected];const cards=ids.map(i=>ps[0].hand[i]);
- if(!valid(cards)){alert("その組み合わせは捨てられません。");return}
- ids.sort((a,b)=>b-a).forEach(i=>ps[0].hand.splice(i,1));
- previousFace=face;
- const non=cards.filter(c=>!c.joker);
- face=non.length?non.reduce((a,b)=>val(a)>=val(b)?a:b):cards[0];
- lastDiscard=cards.slice();
- discardPile.push(...cards);
- selected.clear();phase="draw";
- writeLog("あなたが "+cards.map(label).join("・")+" を捨てました。"+(cards.length>1?"（"+cards.length+"枚）":""));
- if(total(ps[0].hand)<=5)writeLog("あなたはヤニブ可能です！");
- render();
-}
-function yaniv(){if(phase==="discard"&&total(ps[0].hand)<=5)finish(0)}
-function finishDraw(){
- if(total(ps[0].hand)===0){finish(turn);return}
- previousFace=null;
- turn=(turn+1)%4;
- phase="discard";
- render();
- if(turn!==0)setTimeout(cpuTurn,650);
-}
-function nextTurn(){finishDraw()}
-function cpuTurn(){
- if(ended)return;
- const p=ps[turn];
- // CPUも「捨てる→引く」の順番で処理する。
- p.hand.sort((a,b)=>val(b)-val(a));
- let discard=p.hand.shift();
- previousFace=face;
- face=discard;
- lastDiscard=[discard];
- discardPile.push(discard);
- writeLog(p.name+"が1枚捨てました。");
- if(total(p.hand)<=5&&Math.random()<0.22){finish(turn);return}
- if(!recycleDeck()){ended=true;render();return}
- let take;
- if(previousFace&&!previousFace.joker&&val(previousFace)<=5&&Math.random()<0.65){take=previousFace;previousFace=null;}else{take=deck.pop();previousFace=null;}
- p.hand.push(take);
- writeLog(p.name+"が1枚引きました。");
- turn=(turn+1)%4;phase="discard";render();
- if(turn!==0)setTimeout(cpuTurn,650);
-}
-function finish(caller){
- ended=true;phase="done";
- const scores=ps.map(p=>total(p.hand)),min=Math.min(...scores),max=Math.max(...scores);
- const callerScore=scores[caller];
- const returner=scores.some((s,i)=>i!==caller&&s<=callerScore);
- const diff=max-min;
- let payer,winner,amount,text;
- if(returner){payer=caller;winner=scores.findIndex((s,i)=>i!==caller&&s<=callerScore);for(let i=0;i<scores.length;i++){if(i!==caller&&scores[i]<=callerScore&&scores[i]<scores[winner])winner=i;}amount=diff*2*roundRate;text=names[caller]+"のヤニブ返しが成立！";}
- else{winner=caller;payer=scores.indexOf(max);amount=diff*roundRate;text="ヤニブ成立！";}
- if(winner!==payer){cumulativePaid[winner]+=amount;cumulativePaid[payer]-=amount;}
- render();
- document.getElementById("resultTitle").textContent=text;
- let rows=scores.map((s,i)=>`<tr><td>${names[i]}</td><td>${s}点</td></tr>`).join("");
- document.getElementById("resultBody").innerHTML=
- `<table><tr><th>プレイヤー</th><th>手札合計</th></tr>${rows}</table>
- <p>勝者：<b>${names[winner]}</b>（+${amount}点）</p>
- <p>敗者：<b>${names[payer]}</b>（-${amount}点）</p>
- <p class="muted">${returner?"ヤニブ返し：点数差×2×倍率":"通常：点数差×倍率"}（今回の倍率：${roundRate}）</p>
- <p>累計収支：勝者 ${cumulativePaid[winner]>0?'+':''}${cumulativePaid[winner]}点 ／ 敗者 ${cumulativePaid[payer]}点</p>`;
- renderCumulative();
- document.getElementById("result").classList.remove("hidden");
-}
-</script>
-</body>
-</html>
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>やにぶ ネット対戦試作</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#104b30;color:white;font:16px system-ui,sans-serif}main{max-width:740px;margin:auto;padding:14px}h1{text-align:center;font-size:26px}.panel{background:#ffffff18;border:1px solid #ffffff29;padding:16px;margin:12px 0;border-radius:14px}input,button{font-size:16px;padding:12px;border-radius:9px;border:0;margin:4px}input{max-width:100%;width:235px}button{background:#ffda53;color:#222;font-weight:700}button:disabled{opacity:.42}.cards{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.card{width:49px;height:67px;display:grid;place-items:center;border-radius:8px;background:white;color:#222;font-size:20px;font-weight:800;box-shadow:0 2px 4px #0004;cursor:pointer}.card.chosen{outline:4px solid #f8b400;transform:translateY(-6px)}.card.back{background:#2b3b85;color:white}.players{display:grid;grid-template-columns:1fr 1fr;gap:8px}.player{padding:12px;border-radius:12px;background:#ffffff18}.active{outline:2px solid #ffe177}small,.muted{opacity:.8}.hidden{display:none!important}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.status{font-weight:700}.error{color:#ffb5b5}table{width:100%;border-collapse:collapse}td,th{padding:7px;border-bottom:1px solid #ffffff28;text-align:left}</style>
+</head><body><main><h1>やにぶ <small>ネット対戦試作</small></h1><div id="connection" class="panel status">Firebaseへ接続中…</div>
+<section id="lobby" class="panel hidden"><h2>ルーム作成・参加</h2><div>名前 <input id="playerName" maxlength="18" placeholder="プレイヤー名" value="プレイヤー"></div><div class="row"><button id="create">ルーム作成</button><input id="roomCode" placeholder="ルームコード" maxlength="8"><button id="join">参加</button></div><p class="muted">同じルームコードを友達に伝えてください。2〜4人で遊べます。</p></section>
+<section id="waiting" class="panel hidden"><h2>ルーム <span id="roomLabel"></span></h2><div id="memberList"></div><button id="startGame">対戦開始（ホストのみ）</button><p class="muted">ホストの画面は閉じないでください。通信途中でホストが退出すると進行できなくなります。</p></section>
+<section id="game" class="hidden"><div class="panel"><div id="roundText"></div><div class="players" id="players"></div></div>
+<div class="panel"><div class="row"><div><strong>山札</strong><div class="card back" id="deckCard">🂠</div><small id="deckCount"></small></div><div><strong>場札</strong><div id="faceCards" class="cards"></div></div></div><div class="row"><button id="drawDeck">山札から引く</button><button id="drawFace">捨てる前の場札を取る</button></div></div>
+<div class="panel"><div id="status" class="status"></div><h3>自分の手札 <span id="myCount"></span></h3><div id="myHand" class="cards"></div><div class="row"><button id="discard">選択したカードを捨てる</button><button id="yaniv">ヤニブ宣言</button></div><small>自分のターンの開始時、手札合計が5点以下ならヤニブを宣言できます。捨てる場合はカードを選択 → 捨てる → 山札または捨てる前の場札から1枚取ります。</small></div>
+<div id="result" class="panel hidden"><h2>結果</h2><div id="resultText"></div><button id="nextRound">次のゲーム（ホスト）</button></div></section>
+<div class="panel"><strong>お知らせ</strong><div id="notice" aria-live="polite">ルームに参加してください。</div></div></main>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+import {getAuth,signInAnonymously,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import {getDatabase,ref,get,set,update,onValue,onChildAdded,push,remove} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js';
+const firebaseConfig={apiKey:'AIzaSyD7yUoiaQBtGcPqM6g4O_G4IL57s3Paujk',authDomain:'vinay-ac95d.firebaseapp.com',databaseURL:'https://vinay-ac95d-default-rtdb.firebaseio.com/',projectId:'vinay-ac95d',storageBucket:'vinay-ac95d.firebasestorage.app',messagingSenderId:'417363884808',appId:'1:417363884808:web:e38cd0bf5f27c003938abd',measurementId:'G-1RDYZS9GP5'};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);
+const $=x=>document.getElementById(x);const show=(id,yes)=>$(id).classList.toggle('hidden',!yes);const notice=x=>{$('notice').textContent=x};const ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const val=c=>c.r==='Joker'?0:c.r==='A'?1:c.r==='J'?11:c.r==='Q'?12:c.r==='K'?13:Number(c.r),label=c=>c.r==='Joker'?'🃏':c.r;
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fresh=()=>shuffle([...ranks.flatMap(r=>Array.from({length:4},(_,i)=>({r,id:r+'-'+i}))),{r:'Joker',id:'J-0'},{r:'Joker',id:'J-1'}]);
+const sum=h=>h.reduce((s,c)=>s+val(c),0);const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let uid=null,room=null,host=false,publicState=null,members={},ownHand=[],state=null,selected=new Set(),listenerStops=[],processing=false,actionSeen=new Set();
+const path=s=>ref(db,'rooms/'+room+'/'+s),playerIndex=()=>publicState?.players?.findIndex(p=>p.uid===uid)??-1;
+function valid(cards){if(!cards.length)return false;if(cards.length===1)return true;const non=cards.filter(c=>c.r!=='Joker'),j=cards.length-non.length;if(non.length&&non.every(c=>val(c)===val(non[0])))return true;if(cards.length<3)return false;const nums=non.map(val);if(new Set(nums).size!==nums.length)return false;for(let n=1;n+cards.length-1<=13;n++)if(nums.every(x=>x>=n&&x<n+cards.length))return true;return false;}
+function initialGame(players,round=1,scores=null,startTurn=0){let deck,face,rate=50,hands;let tries=0;do{deck=fresh();hands=players.map(()=>[]);for(let j=0;j<5;j++)hands.forEach(h=>h.push(deck.pop()));face=deck.pop();if(face.r==='Joker')rate+=50;tries++;}while(face.r==='Joker'&&tries<100);if(val(face)>=10)rate+=50;return {players:players.map((p,i)=>({...p,hand:hands[i],score:scores?.[i]??0})),deck,discard:[face],face,shown:[face],oldFace:null,round,rate,turn:startTurn,phase:'discard',status:'playing',result:null};}
+function pub(){return {hostUid:state.players[0].uid,status:state.status,players:state.players.map(p=>({uid:p.uid,name:p.name,score:p.score})),handCounts:state.players.map(p=>p.hand.length),deckCount:state.deck.length,face:state.face,shown:state.shown,oldFace:state.phase==='draw'?state.oldFace:null,round:state.round,rate:state.rate,turn:state.turn,phase:state.phase,result:state.result||null,updatedAt:Date.now()};}
+async function publish(){if(!host||!state)return;const writes={'public':pub()};state.players.forEach(p=>writes['private/'+p.uid+'/hand']=p.hand);await update(ref(db,'rooms/'+room),writes);}
+function recycle(){if(state.deck.length)return true;const remaining=state.discard.filter(c=>c.id!==state.face.id);if(!remaining.length)return false;state.deck=shuffle(remaining);state.discard=[state.face];return true;}
+function settle(index){const scores=state.players.map(p=>sum(p.hand));const caller=scores[index];let winner=index,payer=scores.indexOf(Math.max(...scores)),reflected=scores.some((s,i)=>i!==index&&s<=caller);if(reflected){payer=index;winner=state.players.reduce((best,p,i)=>i!==index&&scores[i]<=caller&&(best<0||scores[i]<scores[best])?i:best,-1);}let amount=(Math.max(...scores)-Math.min(...scores))*state.rate*(reflected?2:1);if(winner!==payer){state.players[winner].score+=amount;state.players[payer].score-=amount;}state.status='done';state.phase='done';state.result={scores,winner,payer,amount,reflected};}
+function action(user,a){if(!state||state.status!=='playing')throw Error('対戦中ではありません');const i=state.players.findIndex(p=>p.uid===user);if(i<0||i!==state.turn)throw Error('自分のターンではありません');const p=state.players[i];if(a.type==='yaniv'){if(state.phase!=='discard'||sum(p.hand)>5)throw Error('ヤニブできません');settle(i);return;}
+if(a.type==='discard'){if(state.phase!=='discard')throw Error('今は捨てられません');const inds=a.indices;if(!Array.isArray(inds)||!inds.length||new Set(inds).size!==inds.length||inds.some(k=>!Number.isInteger(k)||k<0||k>=p.hand.length))throw Error('カード選択が不正です');const cards=inds.map(k=>p.hand[k]);if(!valid(cards))throw Error('この組み合わせは捨てられません');inds.sort((a,b)=>b-a).forEach(k=>p.hand.splice(k,1));state.oldFace=state.face;state.shown=cards;const non=cards.filter(c=>c.r!=='Joker');state.face=non.length?non.reduce((a,b)=>val(a)>val(b)?a:b):cards[0];state.discard.push(...cards);state.phase='draw';return;}
+if(a.type==='draw'){if(state.phase!=='draw')throw Error('先に捨ててください');let c;if(a.source==='face'){c=state.oldFace;if(!c)throw Error('場札を取れません');state.discard=state.discard.filter(x=>x.id!==c.id);}else if(a.source==='deck'){if(!recycle())throw Error('山札がありません');c=state.deck.pop();}else throw Error('引く場所が不正です');p.hand.push(c);state.oldFace=null;state.phase='discard';state.turn=(i+1)%state.players.length;return;}
+throw Error('操作が不正です');}
+async function handleAction(snap){if(!host||!state||processing)return;processing=true;try{const actionRef=snap.ref,user=snap.ref.parent.key,a=snap.val();try{action(user,a);await publish();}catch(e){notice('操作を処理できませんでした: '+e.message);}await remove(actionRef);}catch(e){notice('同期エラー: '+e.message)}finally{processing=false;}}
+function watchActions(){// actions/{uid}/{key}: listen to each member queue
+state.players.forEach(p=>{listenerStops.push(onChildAdded(path('actions/'+p.uid),snap=>{if(!actionSeen.has(snap.key)){actionSeen.add(snap.key);queue.push(snap);drain();}}));});}
+const queue=[];let draining=false;async function drain(){if(draining)return;draining=true;while(queue.length){let snap=queue.shift();await handleAction(snap)}draining=false;}
+function render(){const s=publicState;if(!s)return;show('waiting',s.status==='lobby');show('game',s.status==='playing'||s.status==='done');$('roomLabel').textContent=room;$('memberList').textContent=Object.values(members).map(m=>m.name).join(' / ');$('startGame').disabled=!host||Object.keys(members).length<2;
+if(s.status==='lobby')return;$('roundText').textContent=`第${s.round}ゲーム｜1点差につき${s.rate}点`;$('deckCount').textContent=s.deckCount+'枚';const face=$('faceCards');face.replaceChildren();(s.shown||[s.face]).forEach(c=>{let x=document.createElement('div');x.className='card';x.textContent=label(c);face.append(x)});
+const pi=playerIndex(),mineTurn=pi===s.turn,isDiscard=mineTurn&&s.phase==='discard'&&s.status==='playing',isDraw=mineTurn&&s.phase==='draw'&&s.status==='playing';$('players').replaceChildren();s.players.forEach((p,i)=>{const x=document.createElement('div');x.className='player'+(s.turn===i?' active':'');x.textContent=`${p.name}${p.uid===uid?'（自分）':''}｜手札 ${s.handCounts?.[i]??'?'} 枚｜累計 ${p.score>=0?'+':''}${p.score}点`;$('players').append(x)});
+$('myCount').textContent=`${ownHand.length}枚（合計${sum(ownHand)}点）`;$('myHand').replaceChildren();ownHand.forEach((c,i)=>{let x=document.createElement('div');x.className='card'+(selected.has(i)?' chosen':'');x.textContent=label(c);x.onclick=()=>{if(!isDiscard)return;selected.has(i)?selected.delete(i):selected.add(i);render()};$('myHand').append(x)});
+$('status').textContent=s.status==='done'?'このゲームは終了しました':mineTurn?(isDraw?'1枚取ってください':'捨てるか、ヤニブを宣言してください'):`${s.players[s.turn]?.name}のターン`;
+$('discard').disabled=!isDiscard||selected.size===0;$('yaniv').disabled=!isDiscard||sum(ownHand)>5;$('drawDeck').disabled=!isDraw;$('drawFace').disabled=!isDraw||!s.oldFace;$('drawFace').textContent=s.oldFace?'元の場札 '+label(s.oldFace)+' を取る':'元の場札を取る';show('result',s.status==='done');$('nextRound').disabled=!host;
+if(s.status==='done'&&s.result){const r=s.result;$('resultText').textContent=`${r.reflected?'ヤニブ返し':'ヤニブ成立'}｜勝者 ${s.players[r.winner].name} +${r.amount}点／敗者 ${s.players[r.payer].name} -${r.amount}点｜手札合計: ${r.scores.join('・')}`;}}
+async function joinRoom(code,create=false){room=code.toUpperCase().trim();if(!/^[A-Z0-9]{8}$/.test(room)){notice('ルームコードは英数字8桁です');return;}const name=$('playerName').value.trim().slice(0,18)||'プレイヤー';try{if(create){const existed=await get(path('public'));if(existed.exists())throw Error('このルームコードは使用済みです');await set(path('public'),{hostUid:uid,status:'lobby',players:[],handCounts:[],updatedAt:Date.now()});}
+const roomSnap=await get(path('public'));if(!roomSnap.exists())throw Error('ルームが存在しません');if(roomSnap.val().status!=='lobby')throw Error('対戦開始後の新規参加はできません');const ms=await get(path('members'));if(!ms.hasChild(uid)&&ms.size>3)throw Error('ルームは4人までです');await set(path('members/'+uid),{name,joinedAt:Date.now()});host=roomSnap.val().hostUid===uid;show('lobby',false);show('waiting',true);notice('接続しました。ルームコードを共有してください。');listenerStops.forEach(f=>f());listenerStops=[];
+listenerStops.push(onValue(path('public'),snap=>{publicState=snap.val();selected.clear();render()}));listenerStops.push(onValue(path('members'),snap=>{members=snap.val()||{};render()}));listenerStops.push(onValue(path('private/'+uid+'/hand'),snap=>{ownHand=snap.val()||[];if(Array.isArray(ownHand))render()}));
+}catch(e){notice('接続できません: '+e.message);room=null;}}
+function code(){const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:8},()=>alphabet[Math.floor(Math.random()*alphabet.length)]).join('')}
+$('create').onclick=()=>joinRoom(code(),true);$('join').onclick=()=>joinRoom($('roomCode').value,false);
+$('startGame').onclick=async()=>{try{if(!host)throw Error('ホストだけが開始できます');const players=Object.entries(members).sort((a,b)=>a[1].joinedAt-b[1].joinedAt).map(([id,m])=>({uid:id,name:m.name}));if(players.length<2||players.length>4)throw Error('2〜4人で開始してください');if(players[0].uid!==uid){const me=players.find(p=>p.uid===uid);players.splice(players.indexOf(me),1);players.unshift(me);}state=initialGame(players);await publish();watchActions();}catch(e){notice(e.message)}};
+async function sendAction(a){if(!room||!publicState)return;try{await push(path('actions/'+uid),a);}catch(e){notice('操作送信に失敗: '+e.message)}}
+$('discard').onclick=()=>{const indices=[...selected];const cards=indices.map(i=>ownHand[i]);if(!valid(cards)){notice('捨てる組み合わせが不正です');return}sendAction({type:'discard',indices});selected.clear()};$('drawDeck').onclick=()=>sendAction({type:'draw',source:'deck'});$('drawFace').onclick=()=>sendAction({type:'draw',source:'face'});$('yaniv').onclick=()=>sendAction({type:'yaniv'});
+$('nextRound').onclick=async()=>{if(!host||!state||state.status!=='done'||!state.result)return;const previous=state.players;const nextFirst=state.result.winner;state=initialGame(previous.map(({uid,name})=>({uid,name})),state.round+1,previous.map(p=>p.score),nextFirst);await publish();};
+onAuthStateChanged(auth,u=>{if(u){uid=u.uid;$('connection').textContent='接続済み（匿名認証）';show('lobby',true);}});signInAnonymously(auth).catch(e=>{$('connection').textContent='認証エラー: '+e.message;notice('Firebase Authentication の匿名認証を確認してください')});
+</script></body></html>
