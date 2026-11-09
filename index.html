@@ -10,8 +10,28 @@
 @keyframes cutinPop{0%{transform:scale(.45) rotate(-9deg)}25%{transform:scale(1.15) rotate(2deg)}45%{transform:scale(1)}100%{transform:scale(1.05)}}
 @keyframes cutinSpin{from{transform:rotate(-35deg) scale(.5);opacity:.1}to{transform:rotate(80deg) scale(1.4);opacity:.8}}
 @media(prefers-reduced-motion:reduce){.lucky-cutin,.lucky-cutin .cutin-core,.lucky-cutin .cutin-glow{animation:none}.lucky-cutin{background:rgba(0,0,0,.55)}}
+.yaniv-cutin{position:fixed;inset:0;z-index:1001;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle,rgba(255,228,110,.14),rgba(7,23,17,.68) 55%,rgba(0,0,0,.82));animation:yanivOverlayFade 1.55s ease both}
+.yaniv-stage{position:relative;min-width:min(92vw,760px);padding:24px;text-align:center;filter:drop-shadow(0 0 18px rgba(255,220,90,.42))}
+.yaniv-burst{position:absolute;inset:50% auto auto 50%;width:min(70vw,420px);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,rgba(255,241,161,.95) 0 8deg,transparent 8deg 18deg);opacity:.45;animation:yanivBurst 1.4s ease-out both}
+.yaniv-main{position:relative;font-size:clamp(42px,12vw,92px);font-weight:1000;letter-spacing:.08em;line-height:1;color:#fff7d0;text-shadow:0 0 12px #ffde59,0 0 26px #ffbf00,0 0 54px rgba(255,191,0,.7)}
+.yaniv-normal .yaniv-main{animation:yanivPop 1.25s cubic-bezier(.18,.88,.24,1.06) both}
+.yaniv-normal .yaniv-sub{margin-top:12px;font-size:clamp(18px,4vw,26px);font-weight:900;color:#fff3b8;letter-spacing:.18em;opacity:.95;animation:yanivSubRise 1.25s ease both}
+.yaniv-reflect .yaniv-word{position:relative;display:inline-block;font-size:clamp(42px,12vw,92px);font-weight:1000;line-height:1.05;letter-spacing:.08em;color:transparent}
+.yaniv-reflect .yaniv-half{position:absolute;inset:0;color:#fff7d0;text-shadow:0 0 12px #ffde59,0 0 26px #ffbf00,0 0 54px rgba(255,191,0,.7)}
+.yaniv-reflect .yaniv-half.left{clip-path:inset(0 50% 0 0);animation:splitLeft 1.35s ease both}
+.yaniv-reflect .yaniv-half.right{clip-path:inset(0 0 0 50%);animation:splitRight 1.35s ease both}
+.yaniv-reflect .yaniv-return{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%) scale(.35) rotate(-8deg);font-size:clamp(34px,10vw,82px);font-weight:1000;white-space:nowrap;color:#ffffff;text-shadow:0 0 10px #6affc5,0 0 24px #00c67a,0 0 42px rgba(0,198,122,.75);animation:returnStrike 1.35s cubic-bezier(.18,.88,.24,1.06) both}
+.yaniv-reflect .yaniv-mini{margin-top:18px;font-size:clamp(16px,3.6vw,23px);font-weight:900;letter-spacing:.14em;color:#d6fff0;animation:yanivSubRise 1.35s ease both}
+@keyframes yanivOverlayFade{0%{opacity:0}10%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes yanivBurst{0%{transform:translate(-50%,-50%) scale(.2) rotate(-30deg);opacity:.05}30%{opacity:.55}100%{transform:translate(-50%,-50%) scale(1.25) rotate(60deg);opacity:0}}
+@keyframes yanivPop{0%{transform:scale(.3) rotate(-8deg);opacity:0}22%{transform:scale(1.18) rotate(2deg);opacity:1}42%{transform:scale(.94)}100%{transform:scale(1)}}
+@keyframes yanivSubRise{0%{opacity:0;transform:translateY(24px)}24%{opacity:0}100%{opacity:1;transform:translateY(0)}}
+@keyframes splitLeft{0%{transform:translateX(0) rotate(0);opacity:1}18%{transform:translateX(0) rotate(0);opacity:1}52%{transform:translateX(-18px) rotate(-4deg);opacity:1}100%{transform:translateX(-74px) rotate(-10deg);opacity:.96}}
+@keyframes splitRight{0%{transform:translateX(0) rotate(0);opacity:1}18%{transform:translateX(0) rotate(0);opacity:1}52%{transform:translateX(18px) rotate(4deg);opacity:1}100%{transform:translateX(74px) rotate(10deg);opacity:.96}}
+@keyframes returnStrike{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-10deg)}28%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-10deg)}58%{opacity:1;transform:translate(-50%,-50%) scale(1.18) rotate(4deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}}
+@media(prefers-reduced-motion:reduce){.yaniv-cutin,.yaniv-burst,.yaniv-normal .yaniv-main,.yaniv-normal .yaniv-sub,.yaniv-reflect .yaniv-half,.yaniv-reflect .yaniv-return,.yaniv-reflect .yaniv-mini{animation:none}.yaniv-cutin{background:rgba(0,0,0,.7)}}
 .info{background:#0b3e2b;padding:9px;border-radius:8px;margin-top:8px}</style>
-</head><body><div id="luckyCutin" class="lucky-cutin hidden" aria-live="polite"><div class="cutin-core"><div class="cutin-glow"></div><div id="luckyCard" class="cutin-card"></div><div id="luckyMessage" class="cutin-text"></div></div></div><main><h1>やにぶ <small>ネット対戦試作</small></h1><div id="connection" class="panel status">Firebaseへ接続中…</div>
+</head><body><div id="luckyCutin" class="lucky-cutin hidden" aria-live="polite"><div class="cutin-core"><div class="cutin-glow"></div><div id="luckyCard" class="cutin-card"></div><div id="luckyMessage" class="cutin-text"></div></div></div><div id="yanivCutin" class="yaniv-cutin hidden" aria-live="assertive"></div><main><h1>やにぶ <small>ネット対戦試作</small></h1><div id="connection" class="panel status">Firebaseへ接続中…</div>
 <section id="lobby" class="panel hidden"><h2>ルーム作成・参加</h2><div>名前 <input id="playerName" maxlength="18" placeholder="プレイヤー名" value="プレイヤー"></div><div class="row"><button id="create">ルーム作成</button><input id="roomCode" placeholder="ルームコード" maxlength="8"><button id="join">参加</button></div><p class="muted">同じルームコードを友達に伝えてください。2〜4人で遊べます。</p></section>
 <section id="waiting" class="panel hidden"><h2>ルーム <span id="roomLabel"></span></h2><div id="memberList"></div><button id="startGame">対戦開始（ホストのみ）</button><button id="leaveRoom">退出する</button><p class="muted">ホストの画面は閉じないでください。通信途中でホストが退出すると進行できなくなります。</p></section>
 <section id="game" class="hidden"><div class="panel"><div id="roundText"></div><div class="players" id="players"></div><div class="info" id="lastPickup">直近の場札取得：まだありません</div></div>
@@ -33,7 +53,7 @@ const sum=h=>h.reduce((s,c)=>s+val(c),0);const esc=s=>String(s).replace(/[&<>"']
 let uid=null,room=null,host=false,publicState=null,members={},ownHand=[],state=null,selected=new Set(),listenerStops=[],processing=false,actionSeen=new Set(),handFingerprint="";
 const playerColors=['#ff9696','#83c7ff','#ffe381','#c8a9ff'];
 let sortDescending=false,resultRound=null,startingNext=false,actionStops=[];
-let cutinTimer=null,handInitialized=false,previousHandCount=null;
+let cutinTimer=null,yanivCutinTimer=null,handInitialized=false,previousHandCount=null,shownResultEffectKey="";
 
 const path=s=>ref(db,'rooms/'+room+'/'+s),playerIndex=()=>publicState?.players?.findIndex(p=>p.uid===uid)??-1;
 function valid(cards){if(!cards.length)return false;if(cards.length===1)return true;const non=cards.filter(c=>c.r!=='Joker'),j=cards.length-non.length;if(non.length&&non.every(c=>val(c)===val(non[0])))return true;if(cards.length<3)return false;const nums=non.map(val);if(new Set(nums).size!==nums.length)return false;for(let n=1;n+cards.length-1<=13;n++)if(nums.every(x=>x>=n&&x<n+cards.length))return true;return false;}
@@ -59,7 +79,8 @@ function watchActions(){// actions/{uid}/{key}: listen to each member queue
 if(actionStops.length)return;state.players.forEach(p=>{actionStops.push(onChildAdded(path('actions/'+p.uid),snap=>{if(!actionSeen.has(snap.key)){actionSeen.add(snap.key);queue.push(snap);drain();}}));});}
 const queue=[];let draining=false;async function drain(){if(draining)return;draining=true;while(queue.length){let snap=queue.shift();await handleAction(snap)}draining=false;}
 function render(){const s=publicState;if(!s)return;host=s.hostUid===uid;show('waiting',s.status==='lobby');show('game',s.status==='playing'||s.status==='done');$('roomLabel').textContent=room;$('memberList').textContent=Object.values(members).map(m=>m.name).join(' / ');$('startGame').disabled=!host||Object.keys(members).length<2;
-if(s.status==='lobby')return;$('roundText').textContent=`第${s.round}ゲーム｜1点差につき${s.rate}点｜今回の先手：${s.players.find(p=>p.uid===s.starterUid)?.name||'?'}${s.turn===playerIndex()&&s.phase==='discard'&&s.status==='playing'?'（あなたの番）':''}`;$('deckCount').textContent=s.deckCount+'枚';const face=$('faceCards');face.replaceChildren();(s.shown||[s.face]).forEach(c=>{let x=document.createElement('div');x.className='card';x.textContent=label(c);face.append(x)});
+if(s.status==='lobby')return;
+if(s.status==='done'&&s.result){const effectKey=`${s.round}-${s.result.reflected?'reflect':'normal'}`;if(shownResultEffectKey!==effectKey){shownResultEffectKey=effectKey;showYanivCutin(Boolean(s.result.reflected));}}else if(s.status==='playing'){shownResultEffectKey='';}$('roundText').textContent=`第${s.round}ゲーム｜1点差につき${s.rate}点｜今回の先手：${s.players.find(p=>p.uid===s.starterUid)?.name||'?'}${s.turn===playerIndex()&&s.phase==='discard'&&s.status==='playing'?'（あなたの番）':''}`;$('deckCount').textContent=s.deckCount+'枚';const face=$('faceCards');face.replaceChildren();(s.shown||[s.face]).forEach(c=>{let x=document.createElement('div');x.className='card';x.textContent=label(c);face.append(x)});
 const pi=playerIndex(),mineTurn=pi===s.turn,isDiscard=mineTurn&&s.phase==='discard'&&s.status==='playing',isDraw=mineTurn&&s.phase==='draw'&&s.status==='playing';$('players').replaceChildren();s.players.forEach((p,i)=>{const x=document.createElement('div');x.className='player'+(s.turn===i?' active':'');x.style.setProperty('--player-color',playerColors[i%playerColors.length]);x.textContent=`${p.name}${p.uid===uid?'（自分）':''}｜手札 ${s.handCounts?.[i]??'?'} 枚｜累計 ${p.score>=0?'+':''}${p.score}点`;$('players').append(x)});
 const pickup=s.lastPickup;const pickupPlayer=pickup&&s.players.find(p=>p.uid===pickup.uid);$('lastPickup').textContent=pickupPlayer?`直近の場札取得：${pickupPlayer.name} が ${label(pickup.card)} を取りました`:'直近の場札取得：まだありません';
 $('myCount').textContent=`${ownHand.length}枚（合計${sum(ownHand)}点）`;$('myHand').replaceChildren();const displayed=ownHand.map((c,i)=>({c,i}));if(sortDescending)displayed.sort((a,b)=>val(b.c)-val(a.c)||a.i-b.i);displayed.forEach(({c,i})=>{let x=document.createElement('div');x.className='card'+(selected.has(i)?' chosen':'');x.textContent=label(c);x.onclick=()=>{if(!isDiscard)return;selected.has(i)?selected.delete(i):selected.add(i);render()};$('myHand').append(x)});
@@ -107,7 +128,18 @@ function showLuckyCutin(card){
  overlay.classList.remove('hidden');
  cutinTimer=setTimeout(()=>{overlay.classList.add('hidden');cutinTimer=null},1100);
 }
+function showYanivCutin(reflected){
+ const overlay=$('yanivCutin');
+ if(yanivCutinTimer)clearTimeout(yanivCutinTimer);
+ overlay.innerHTML=reflected
+  ? `<div class="yaniv-stage yaniv-reflect"><div class="yaniv-burst"></div><div class="yaniv-word"><span class="yaniv-half left">ヤニブ！</span><span class="yaniv-half right">ヤニブ！</span>ヤニブ！</div><div class="yaniv-return">返し！</div><div class="yaniv-mini">ヤニブ返し！</div></div>`
+  : `<div class="yaniv-stage yaniv-normal"><div class="yaniv-burst"></div><div class="yaniv-main">ヤニブ！！</div><div class="yaniv-sub">YANIV</div></div>`;
+ overlay.classList.add('hidden');
+ void overlay.offsetWidth;
+ overlay.classList.remove('hidden');
+ yanivCutinTimer=setTimeout(()=>{overlay.classList.add('hidden');yanivCutinTimer=null;},1550);
+}
 
-$('leaveRoom').onclick=async()=>{if(!room||publicState?.status!=='lobby'){notice('対戦中は退出できません');return;}try{const ids=Object.keys(members).filter(id=>id!==uid);if(host&&ids.length){await update(path('public'),{hostUid:ids.sort((a,b)=>members[a].joinedAt-members[b].joinedAt)[0]});}await remove(path('members/'+uid));listenerStops.forEach(f=>f());listenerStops=[];actionStops.forEach(f=>f());actionStops=[];room=null;host=false;publicState=null;state=null;members={};ownHand=[];handFingerprint="";handInitialized=false;previousHandCount=null;if(cutinTimer)clearTimeout(cutinTimer);cutinTimer=null;show('luckyCutin',false);show('waiting',false);show('game',false);show('lobby',true);notice('退出しました');}catch(e){notice('退出できません: '+e.message)}};
+$('leaveRoom').onclick=async()=>{if(!room||publicState?.status!=='lobby'){notice('対戦中は退出できません');return;}try{const ids=Object.keys(members).filter(id=>id!==uid);if(host&&ids.length){await update(path('public'),{hostUid:ids.sort((a,b)=>members[a].joinedAt-members[b].joinedAt)[0]});}await remove(path('members/'+uid));listenerStops.forEach(f=>f());listenerStops=[];actionStops.forEach(f=>f());actionStops=[];room=null;host=false;publicState=null;state=null;members={};ownHand=[];handFingerprint="";handInitialized=false;previousHandCount=null;shownResultEffectKey='';if(cutinTimer)clearTimeout(cutinTimer);cutinTimer=null;if(yanivCutinTimer)clearTimeout(yanivCutinTimer);yanivCutinTimer=null;show('luckyCutin',false);show('yanivCutin',false);show('waiting',false);show('game',false);show('lobby',true);notice('退出しました');}catch(e){notice('退出できません: '+e.message)}};
 onAuthStateChanged(auth,u=>{if(u){uid=u.uid;$('connection').textContent='接続済み（匿名認証）';show('lobby',true);}});signInAnonymously(auth).catch(e=>{$('connection').textContent='認証エラー: '+e.message;notice('Firebase Authentication の匿名認証を確認してください')});
 </script></body></html>
