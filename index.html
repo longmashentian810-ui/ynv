@@ -75,8 +75,8 @@ function initialGame(players,round=1,scores=null,startUid=null,baseRate=50,score
 function pub(){return {hostUid:state.hostUid||state.players[0]?.uid,status:state.status,baseRate:state.baseRate,scoreBoard:state.scoreBoard,exitPending:state.exitPending||{},players:state.players.map(p=>({uid:p.uid,name:p.name,score:p.score})),handCounts:state.players.map(p=>p.hand.length),deckCount:state.deck.length,face:state.face,shown:state.shown,oldFace:state.phase==='draw'?state.oldFace:null,round:state.round,rate:state.rate,turnsCompleted:state.turnsCompleted,turn:state.turn,starterUid:state.starterUid,phase:state.phase,result:state.result||null,lastPickup:state.lastPickup||null,updatedAt:Date.now()};}
 async function publish(){if(!host||!state)return;const writes={'public':pub()};state.players.forEach(p=>writes['private/'+p.uid+'/hand']=p.hand);await update(ref(db,'rooms/'+room),writes);}
 function recycle(){if(state.deck.length)return true;const remaining=state.discard.filter(c=>c.id!==state.face.id);if(!remaining.length)return false;state.deck=shuffle(remaining);state.discard=[state.face];return true;}
-// Winning points are paid by *all* other active players, shared as fairly as
-// possible in 50-point units. The remainder is distributed randomly.
+// Only players tied for the highest hand total among non-winners pay.
+// If there is a tie, split the amount as fairly as possible in 50-point units.
 function splitLosses(total, playerCount){
  if(playerCount<1)return [];
  const units=Math.round(total/50);
@@ -98,14 +98,17 @@ function settle(index){
   winner=state.players.reduce((best,p,i)=>i!==index&&scores[i]<=caller&&(best<0||scores[i]<scores[best])?i:best,-1);
  }
  const amount=(Math.max(...scores)-Math.min(...scores))*state.rate*((reflected||tenhou)?2:1);
- const losers=state.players.map((p,i)=>i).filter(i=>i!==winner);
- const losses=splitLosses(amount,losers.length);
+ // The winner cannot be charged. Only the highest-scoring non-winner(s) pay.
+ // Tied highest totals share the payment, with random 50-point remainders.
+ const maxLoserScore=Math.max(...scores.filter((_,i)=>i!==winner));
+ const payers=scores.map((score,i)=>i!==winner&&score===maxLoserScore?i:-1).filter(i=>i>=0);
+ const losses=splitLosses(amount,payers.length);
  const deltas=state.players.map(()=>0);
- losers.forEach((playerIndex,i)=>{deltas[playerIndex]=-losses[i];});
+ payers.forEach((playerIndex,i)=>{deltas[playerIndex]=-losses[i];});
  deltas[winner]=losses.reduce((a,b)=>a+b,0);
  state.players.forEach((p,i)=>{p.score+=deltas[i];state.scoreBoard[p.uid]={name:p.name,score:p.score,departed:false};});
  state.status='done';state.phase='done';
- state.result={scores,winner,winnerUid:state.players[winner].uid,payer:reflected?index:null,amount,deltas,reflected,tenhou,endsAt:Date.now()+10000,round:state.round,acks:{}};
+ state.result={scores,winner,winnerUid:state.players[winner].uid,payer:reflected?index:null,payers,amount,deltas,reflected,tenhou,endsAt:Date.now()+10000,round:state.round,acks:{}};
 }
 function action(user,a){
 if(a?.type==='exit_toggle'){
