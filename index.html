@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>やにぶ ネット対戦（切断復帰・ホスト引き継ぎ版）</title>
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>やにぶ ネット対戦（対戦履歴・精算表版）</title>
 <style>*{box-sizing:border-box}body{margin:0;background:#104b30;color:white;font:16px system-ui,sans-serif}main{max-width:740px;margin:auto;padding:14px}h1{text-align:center;font-size:26px}.panel{background:#ffffff18;border:1px solid #ffffff29;padding:16px;margin:12px 0;border-radius:14px}input,button{font-size:16px;padding:12px;border-radius:9px;border:0;margin:4px}input{max-width:100%;width:235px}button{background:#ffda53;color:#222;font-weight:700}button:disabled{opacity:.42}.cards{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.card{width:49px;height:67px;display:grid;place-items:center;border-radius:8px;background:white;color:#222;font-size:20px;font-weight:800;box-shadow:0 2px 4px #0004;cursor:pointer}.card.chosen{outline:4px solid #f8b400;transform:translateY(-6px)}.card.back{background:#2b3b85;color:white}.players{display:grid;grid-template-columns:1fr 1fr;gap:8px}.player{padding:12px;border-radius:12px;background:#ffffff18}.active{outline:2px solid #ffe177}small,.muted{opacity:.8}.hidden{display:none!important}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.status{font-weight:700}.error{color:#ffb5b5}table{width:100%;border-collapse:collapse}td,th{padding:7px;border-bottom:1px solid #ffffff28;text-align:left}.player{border-left:7px solid var(--player-color,#ddd)}.player.active{box-shadow:0 0 0 2px #ffe177 inset}.color-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--player-color);margin-right:7px;vertical-align:middle}.result-title{font-size:21px;font-weight:800}.result-row{display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #ffffff35}
 @media(max-width:520px){.players{grid-template-columns:1fr}.result-row{gap:8px;flex-wrap:wrap}.result-row>span:last-child{margin-left:auto}}
 /* Only the owner of a qualifying last card sees this brief cut-in. */
@@ -32,7 +32,9 @@
 @keyframes returnStrike{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-10deg)}28%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-10deg)}58%{opacity:1;transform:translate(-50%,-50%) scale(1.18) rotate(4deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}}
 @media(prefers-reduced-motion:reduce){.yaniv-cutin,.yaniv-burst,.yaniv-normal .yaniv-main,.yaniv-normal .yaniv-sub,.yaniv-reflect .yaniv-half,.yaniv-reflect .yaniv-return,.yaniv-reflect .yaniv-mini{animation:none}.yaniv-cutin{background:rgba(0,0,0,.7)}}
 .rate-panel{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}.rate-panel select{font-size:16px;padding:9px;border-radius:9px;border:0;color:#183926;background:#fff5db}.warn-rate{color:#ffe59c;font-weight:800}.exit-toggle{background:#dfefda;color:#143f2a}.exit-toggle.queued{background:#ffae83;color:#382015}.scoreboard{padding:10px;background:#082d22;border-radius:11px;margin-top:10px}.score-line{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid #ffffff27}.score-line small{font-weight:500}.closed-panel{background:#1e4131;border:1px solid #f5d76f;border-radius:12px;padding:14px;margin:12px 0}
-.info{background:#0b3e2b;padding:9px;border-radius:8px;margin-top:8px}.share-area{margin:12px 0;padding:12px;background:#0b3e2b;border:1px solid #ffffff33;border-radius:10px}.share-area .share-code{font-size:24px;font-weight:900;letter-spacing:.13em;user-select:all}.share-area button{margin:7px 5px 2px 0}.share-tip{font-size:13px;opacity:.85;margin:8px 0 0}</style>
+.info{background:#0b3e2b;padding:9px;border-radius:8px;margin-top:8px}.share-area{margin:12px 0;padding:12px;background:#0b3e2b;border:1px solid #ffffff33;border-radius:10px}.share-area .share-code{font-size:24px;font-weight:900;letter-spacing:.13em;user-select:all}.share-area button{margin:7px 5px 2px 0}.share-tip{font-size:13px;opacity:.85;margin:8px 0 0}
+.ledger-panel{background:#0a3428;border:1px solid #e9d98c70;border-radius:12px;padding:13px;margin:13px 0}.ledger-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between}.ledger-head h3{margin:3px 0}.ledger-actions button{font-size:13px;padding:8px 10px;margin:3px}.ledger-meta{color:#d9e6dd;font-size:13px;margin:7px 0}.ledger-scroll{overflow-x:auto}.ledger-table{min-width:350px;font-size:14px}.ledger-table th,.ledger-table td{padding:7px 6px}.ledger-table td:last-child,.ledger-table th:last-child{text-align:right;white-space:nowrap}.ledger-plus{color:#abf2cb}.ledger-minus{color:#ffcfbc}.history-list{max-height:430px;overflow:auto}.history-entry{border:1px solid #ffffff26;border-radius:8px;margin:8px 0;padding:9px;background:#ffffff0b}.history-entry summary{cursor:pointer;font-weight:700;line-height:1.6}.history-entry .history-detail{padding-top:8px}.history-entry .result-row{font-size:13px;gap:8px}.history-empty{padding:12px;color:#d5e5dc}
+</style>
 </head><body><div id="luckyCutin" class="lucky-cutin hidden" aria-live="polite"><div class="cutin-core"><div class="cutin-glow"></div><div id="luckyCard" class="cutin-card"></div><div id="luckyMessage" class="cutin-text"></div></div></div><div id="yanivCutin" class="yaniv-cutin hidden" aria-live="assertive"></div><main><h1>やにぶ <small>ネット対戦試作</small></h1><div id="connection" class="panel status">Firebaseへ接続中…</div>
 <section id="lobby" class="panel hidden"><h2>ルーム作成・参加</h2><div>名前 <input id="playerName" maxlength="18" placeholder="プレイヤー名" value="プレイヤー"></div><div class="rate-panel"><label for="baseRate">ルーム作成時の基本レート</label><select id="baseRate"><option value="50">50（標準）</option><option value="100">100</option><option value="150">150</option><option value="200">200</option><option value="250">250</option><option value="300">300</option></select></div><p class="muted">初期場札がJ・Q・K（ピクチャー）の場合は＋50。ジョーカーの場合は引き直し1回につき＋50。</p><div class="row"><button id="create">ルーム作成</button><input id="roomCode" placeholder="6桁の数字" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code"><button id="join">参加</button></div><p class="muted">同じルームコードを友達に伝えてください。2〜5人で遊べます。</p></section>
 <section id="waiting" class="panel hidden"><h2>ルーム <span id="roomLabel"></span></h2><div id="lobbyRate" class="warn-rate"></div><div id="memberList"></div><div class="share-area"><div>友達を招待</div><div class="share-code" id="inviteCode"></div><div class="row"><button id="shareRoom" type="button">📤 LINEなどで共有</button><button id="copyInvite" type="button">招待文をコピー</button></div><p class="share-tip">共有できない場合は招待文をコピーしてLINEなどに貼り付けてください。</p></div><button id="startGame">対戦開始（ホストのみ）</button><button id="leaveRoom">退出する</button><p class="muted">通信が切れても同じ端末・ブラウザで復帰できます。ホスト不在時は約20秒で参加者に自動引き継ぎします。</p></section>
@@ -40,7 +42,7 @@
 <div class="panel"><div class="row"><div><strong>山札</strong><div class="card back" id="deckCard">🂠</div><small id="deckCount"></small></div><div><strong>場札</strong><div id="faceCards" class="cards"></div></div></div><div class="row"><button id="drawDeck">山札から引く</button><button id="drawFace">捨てる前の場札を取る</button></div></div>
 <div class="panel"><div id="status" class="status"></div><h3>自分の手札 <span id="myCount"></span></h3><div class="row"><button id="sortHand">数字の大きい順に並べる：OFF</button></div><div id="myHand" class="cards"></div><div class="row"><button id="discard">選択したカードを捨てる</button><button id="yaniv">ヤニブ宣言</button></div><small>自分のターンの開始時、手札合計が5点以下ならヤニブを宣言できます。最初の1周目に捨てる前のヤニブが成功すると天和（返しと同じ2倍得点）です。返された場合は通常のヤニブ返しが成立します。捨てる場合はカードを選択 → 捨てる → 山札または捨てる前の場札から1枚取ります。</small></div>
 <div id="result" class="panel hidden"><h2>ゲーム結果</h2><div id="resultText"></div><p id="countdown" class="status"></p><button id="resultOk">OK（確認しました）</button><p class="muted">全員がOKを押したらすぐ開始。押さない人がいても10秒後に自動開始します。</p></div></section><section id="roomFinished" class="closed-panel hidden"><h2 id="finishedTitle">部屋の対戦が終了しました</h2><div id="finishedScore"></div><p id="finishedMessage"></p><button id="backLobby" type="button">ロビー画面へ戻る</button></section>
-<div class="panel" id="recoveryPanel"><strong>接続・進行状況</strong><div id="recoveryStatus">参加後に表示します</div><button id="retryReconnect" type="button">ルームに再接続する</button></div><div class="panel"><strong>お知らせ</strong><div id="notice" aria-live="polite">ルームに参加してください。</div></div></main>
+<section id="ledgerPanel" class="ledger-panel hidden"><div class="ledger-head"><h3>📋 対戦履歴・精算表</h3><div class="ledger-actions"><button id="copySettlement" type="button">精算表をコピー</button><button id="downloadHistory" type="button">履歴CSV</button></div></div><div id="ledgerSummary"></div><h4>精算表（部屋の開始からの累計）</h4><div id="settlementTable" class="ledger-scroll"></div><p class="ledger-meta">プラスは受取額、マイナスは支払額です。退出した人も部屋が終了するまで表示します。現金の受け渡しは未処理です。</p><h4>精算の送金先（相殺後）</h4><div id="settlementTransfers"></div><h4>ゲーム別の対戦履歴</h4><div id="historyList" class="history-list"></div></section><div class="panel" id="recoveryPanel"><strong>接続・進行状況</strong><div id="recoveryStatus">参加後に表示します</div><button id="retryReconnect" type="button">ルームに再接続する</button></div><div class="panel"><strong>お知らせ</strong><div id="notice" aria-live="polite">ルームに参加してください。</div></div></main>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getAuth,signInAnonymously,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
@@ -77,8 +79,8 @@ try{const incoming=new URL(window.location.href).searchParams.get('room');if(inc
 
 const path=s=>ref(db,'rooms/'+room+'/'+s),playerIndex=()=>publicState?.players?.findIndex(p=>p.uid===uid)??-1;
 function valid(cards){if(!cards.length)return false;if(cards.length===1)return true;const non=cards.filter(c=>c.r!=='Joker'),j=cards.length-non.length;if(non.length&&non.every(c=>val(c)===val(non[0])))return true;if(cards.length<3)return false;const nums=non.map(val);if(new Set(nums).size!==nums.length)return false;for(let n=1;n+cards.length-1<=13;n++)if(nums.every(x=>x>=n&&x<n+cards.length))return true;return false;}
-function initialGame(players,round=1,scores=null,startUid=null,baseRate=50,scoreBoard=null){const startTurn=Math.max(0,players.findIndex(p=>p.uid===startUid));let deck,face,rate=baseRate,hands;let tries=0;do{deck=fresh();hands=players.map(()=>[]);for(let j=0;j<5;j++)hands.forEach(h=>h.push(deck.pop()));face=deck.pop();if(face.r==='Joker')rate+=50;tries++;}while(face.r==='Joker'&&tries<100);if(['J','Q','K'].includes(face.r))rate+=50;return {players:players.map((p,i)=>({...p,hand:hands[i],score:scores?.[i]??0})),baseRate,scoreBoard:scoreBoard||Object.fromEntries(players.map((p,i)=>[p.uid,{name:p.name,score:scores?.[i]??0,departed:false}])),exitPending:{},deck,discard:[face],face,shown:[face],oldFace:null,round,rate,turnsCompleted:0,turn:startTurn,starterUid:players[startTurn].uid,phase:'discard',status:'playing',result:null,lastPickup:null};}
-function pub(){return {hostToken:hostToken||state.hostToken||null,leaseUntil:serverNow()+LEASE_MS,hostUid:state.hostUid||state.players[0]?.uid,status:state.status,baseRate:state.baseRate,scoreBoard:state.scoreBoard,exitPending:state.exitPending||{},players:state.players.map(p=>({uid:p.uid,name:p.name,score:p.score})),handCounts:state.players.map(p=>p.hand.length),deckCount:state.deck.length,face:state.face,shown:state.shown,oldFace:state.phase==='draw'?state.oldFace:null,round:state.round,rate:state.rate,turnsCompleted:state.turnsCompleted,turn:state.turn,starterUid:state.starterUid,phase:state.phase,result:state.result||null,lastPickup:state.lastPickup||null,updatedAt:Date.now()};}
+function initialGame(players,round=1,scores=null,startUid=null,baseRate=50,scoreBoard=null){const startTurn=Math.max(0,players.findIndex(p=>p.uid===startUid));let deck,face,rate=baseRate,hands;let tries=0;do{deck=fresh();hands=players.map(()=>[]);for(let j=0;j<5;j++)hands.forEach(h=>h.push(deck.pop()));face=deck.pop();if(face.r==='Joker')rate+=50;tries++;}while(face.r==='Joker'&&tries<100);if(['J','Q','K'].includes(face.r))rate+=50;return {players:players.map((p,i)=>({...p,hand:hands[i],score:scores?.[i]??0})),baseRate,history:[],scoreBoard:scoreBoard||Object.fromEntries(players.map((p,i)=>[p.uid,{name:p.name,score:scores?.[i]??0,departed:false}])),exitPending:{},deck,discard:[face],face,shown:[face],oldFace:null,round,rate,turnsCompleted:0,turn:startTurn,starterUid:players[startTurn].uid,phase:'discard',status:'playing',result:null,lastPickup:null};}
+function pub(){return {hostToken:hostToken||state.hostToken||null,leaseUntil:serverNow()+LEASE_MS,hostUid:state.hostUid||state.players[0]?.uid,status:state.status,baseRate:state.baseRate,scoreBoard:state.scoreBoard,history:state.history||[],exitPending:state.exitPending||{},players:state.players.map(p=>({uid:p.uid,name:p.name,score:p.score})),handCounts:state.players.map(p=>p.hand.length),deckCount:state.deck.length,face:state.face,shown:state.shown,oldFace:state.phase==='draw'?state.oldFace:null,round:state.round,rate:state.rate,turnsCompleted:state.turnsCompleted,turn:state.turn,starterUid:state.starterUid,phase:state.phase,result:state.result||null,lastPickup:state.lastPickup||null,updatedAt:Date.now()};}
 async function publish(){
  if(!host||!state||!hostToken||publicState?.hostToken!==hostToken)throw Error('ホスト権限が切り替わりました');
  state.hostUid=uid;state.hostToken=hostToken;
@@ -199,6 +201,14 @@ function settle(index){
  deltas[winner]=losses.reduce((a,b)=>a+b,0);
  state.players.forEach((p,i)=>{p.score+=deltas[i];state.scoreBoard[p.uid]={name:p.name,score:p.score,departed:false};});
  state.status='done';state.phase='done';
+ // Append exactly one immutable round record before the atomic Firebase publish.
+ const historyRecord={round:state.round,playedAt:Date.now(),rate:state.rate,baseRate:state.baseRate,
+  kind:reflected?'reflect':tenhou?'tenhou':'yaniv',declarerUid:state.players[index].uid,
+  winnerUid:state.players[winner].uid,amount,
+  participants:state.players.map((p,i)=>({uid:p.uid,name:p.name,handTotal:scores[i],delta:deltas[i],total:p.score,
+   paid:payers.includes(i)}))};
+ state.history=state.history||[];
+ if(!state.history.some(h=>h.round===state.round))state.history.push(historyRecord);
  state.result={scores,winner,winnerUid:state.players[winner].uid,payer:reflected?index:null,payers,amount,deltas,reflected,tenhou,endsAt:Date.now()+10000,round:state.round,acks:{}};
 }
 function action(user,a){
@@ -248,8 +258,77 @@ function renderScoreboard(target,board,active){
  const rows=Object.entries(board||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
  for(const p of rows){const line=document.createElement('div');line.className='score-line';const name=document.createElement('span');name.textContent=p.name+(p.departed||!activeIds.has(p.id)?'（退出）':'');const score=document.createElement('b');score.textContent=(p.score>=0?'+':'')+p.score+'点';line.append(name,score);target.append(line);}
 }
-function render(){const s=publicState;if(!s)return;host=s.hostUid===uid;show('waiting',s.status==='lobby');show('game',!leftRoomView&&(s.status==='playing'||s.status==='done'));show('roomFinished',leftRoomView||s.status==='closed');$('roomLabel').textContent=room;$('inviteCode').textContent=room;$('memberList').textContent=Object.values(members).map(m=>m.name).join(' / ');$('startGame').disabled=!host||!connectionOnline||Object.keys(members).length<2;$('lobbyRate').textContent=`基本レート：${s.baseRate||50}`;if(s.status==='closed'||leftRoomView){$('finishedTitle').textContent=s.status==='closed'?'部屋の対戦が終了しました':'退出しました';$('finishedMessage').textContent=s.status==='closed'?'累積得点はこの部屋の記録として残っています。':'あなたの得点は部屋の記録に残っています。';$('finishedScore').replaceChildren();renderScoreboard($('finishedScore'),s.scoreBoard,s.players);return;}
-if(s.status==='lobby')return;if(s.status==='playing'&&!s.players.some(p=>p.uid===uid)){leftRoomView=true;render();return;}
+// History and settlement use the public scoreBoard; they never reveal private cards.
+function signed(n){n=Number(n)||0;return (n>0?'+':'')+n;}
+function computeTransfers(board){
+ const creditors=board.filter(p=>Number(p.score)>0).map(p=>({name:p.name,rest:Number(p.score)}));
+ const debtors=board.filter(p=>Number(p.score)<0).map(p=>({name:p.name,rest:-Number(p.score)}));
+ const transfers=[];let i=0,j=0;
+ while(i<debtors.length&&j<creditors.length){const n=Math.min(debtors[i].rest,creditors[j].rest);
+  if(n>0)transfers.push({from:debtors[i].name,to:creditors[j].name,amount:n});
+  debtors[i].rest-=n;creditors[j].rest-=n;
+  if(debtors[i].rest===0)i++;if(creditors[j].rest===0)j++;
+ }
+ return transfers;
+}
+function settlementText(s){
+ const board=Object.entries(s?.scoreBoard||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+ const rounds=(s?.history||[]);
+ return [`【やにぶ 精算表】ルーム ${room||''}`,`対戦 ${rounds.length}ゲーム / 基本レート ${s?.baseRate||50}`,
+  ...board.map((p,i)=>`${i+1}. ${p.name}${p.departed?'（退出）':''}：${signed(p.score)}点`),
+  `合計：${signed(board.reduce((n,p)=>n+(Number(p.score)||0),0))}点`,
+  '【精算の送金先（相殺後）】',...computeTransfers(board).map(t=>`${t.from} → ${t.to}：${t.amount}点`),
+  '',...rounds.map(h=>`第${h.round}ゲーム（${h.kind==='reflect'?'ヤニブ返し':h.kind==='tenhou'?'天和':'ヤニブ'} / レート${h.rate}）\n`+
+  (h.participants||[]).map(p=>` ${p.name}：${signed(p.delta)}点（累計${signed(p.total)}点）`).join('\n'))].join('\n').replaceAll('\\n','\n');
+}
+function renderLedger(s){
+ const root=$('ledgerPanel');show('ledgerPanel',Boolean(s&&s.status!=='lobby'));
+ if(!s||s.status==='lobby')return;
+ const board=Object.entries(s.scoreBoard||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+ const history=Array.isArray(s.history)?s.history:[];
+ const total=board.reduce((n,p)=>n+(Number(p.score)||0),0);
+ $('ledgerSummary').textContent=`記録 ${history.length}ゲーム｜参加 ${board.length}人（退出者含む）｜点数合計 ${signed(total)}点`;
+ const table=document.createElement('table');table.className='ledger-table';
+ const head=document.createElement('thead');head.innerHTML='<tr><th>順位</th><th>プレイヤー</th><th>状態</th><th>累計</th></tr>';table.append(head);
+ const body=document.createElement('tbody');
+ board.forEach((p,i)=>{const tr=document.createElement('tr');const values=[String(i+1),p.name,p.departed?'退出':'参加中',signed(p.score)+'点'];values.forEach((v,j)=>{const cell=document.createElement('td');cell.textContent=v;if(j===3)cell.className=p.score>0?'ledger-plus':p.score<0?'ledger-minus':'';tr.append(cell)});body.append(tr)});
+ table.append(body);$('settlementTable').replaceChildren(table);
+ const transfers=computeTransfers(board);const target=$('settlementTransfers');target.replaceChildren();
+ if(!transfers.length){target.textContent='精算対象はありません。';}else{for(const t of transfers){const line=document.createElement('div');line.className='score-line';line.textContent=`${t.from} → ${t.to}：${t.amount}点`;target.append(line)}}
+ const list=$('historyList');list.replaceChildren();
+ if(history.length===0){const p=document.createElement('p');p.className='history-empty';p.textContent='まだ終了したゲームはありません。';list.append(p);return;}
+ for(const h of [...history].reverse()){
+  const card=document.createElement('details');card.className='history-entry';
+  const summary=document.createElement('summary');const winner=(h.participants||[]).find(p=>p.uid===h.winnerUid);
+  const kind=h.kind==='reflect'?'ヤニブ返し':h.kind==='tenhou'?'天和':'ヤニブ';
+  summary.textContent=`第${h.round}ゲーム｜${kind}｜${winner?.name||'不明'} ${signed(h.amount)}点`;
+  const detail=document.createElement('div');detail.className='history-detail';
+  const stamp=document.createElement('div');stamp.className='ledger-meta';stamp.textContent=`${new Date(h.playedAt||0).toLocaleString('ja-JP')}｜適用レート ${h.rate}｜宣言者：${(h.participants||[]).find(p=>p.uid===h.declarerUid)?.name||'不明'}`;detail.append(stamp);
+  for(const p of h.participants||[]){const line=document.createElement('div');line.className='result-row';
+   const name=document.createElement('span');name.textContent=`${p.name}（手札 ${p.handTotal}点）${p.paid?'・支払者':''}`;
+   const score=document.createElement('span');score.textContent=`${signed(p.delta)}点 → 累計 ${signed(p.total)}点`;score.className=p.delta>0?'ledger-plus':p.delta<0?'ledger-minus':'';
+   line.append(name,score);detail.append(line);}
+  card.append(summary,detail);list.append(card);
+ }
+}
+$('copySettlement').onclick=async()=>{
+ if(!publicState)return;const value=settlementText(publicState);
+ try{await navigator.clipboard.writeText(value);notice('精算表と履歴をコピーしました。');}
+ catch(e){window.prompt('精算表をコピーしてください',value);}
+};
+$('downloadHistory').onclick=()=>{
+ const s=publicState;if(!s)return;
+ const lines=[['ルーム','ゲーム','日時','役','基本レート','適用レート','宣言者','勝者','名前','手札合計','増減点','累積点','支払者']];
+ for(const h of s.history||[]){const pp=h.participants||[];for(const p of pp){lines.push([room,h.round,new Date(h.playedAt).toLocaleString('ja-JP'),h.kind,s.baseRate,h.rate,pp.find(q=>q.uid===h.declarerUid)?.name||'',pp.find(q=>q.uid===h.winnerUid)?.name||'',p.name,p.handTotal,p.delta,p.total,p.paid?'はい':'']);}}
+ // Spreadsheet-safe CSV: neutralize leading formula characters in user-supplied names.
+ const escapeCsv=x=>{let v=String(x??'');if(/^[=+@\-\t\r]/.test(v))v="'"+v;return '"'+v.replaceAll('"','""')+'"';};
+ const csv='\uFEFF'+lines.map(row=>row.map(escapeCsv).join(',')).join('\r\n');
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download=`yanibu_${room||'room'}_history.csv`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+};
+
+function render(){const s=publicState;if(!s)return;host=s.hostUid===uid;show('waiting',s.status==='lobby');show('game',!leftRoomView&&(s.status==='playing'||s.status==='done'));show('roomFinished',leftRoomView||s.status==='closed');$('roomLabel').textContent=room;$('inviteCode').textContent=room;$('memberList').textContent=Object.values(members).map(m=>m.name).join(' / ');$('startGame').disabled=!host||!connectionOnline||Object.keys(members).length<2;$('lobbyRate').textContent=`基本レート：${s.baseRate||50}`;if(s.status==='closed'||leftRoomView){$('finishedTitle').textContent=s.status==='closed'?'部屋の対戦が終了しました':'退出しました';$('finishedMessage').textContent=s.status==='closed'?'累積得点はこの部屋の記録として残っています。':'あなたの得点は部屋の記録に残っています。';$('finishedScore').replaceChildren();renderScoreboard($('finishedScore'),s.scoreBoard,s.players);renderLedger(s);return;}
+renderLedger(s);if(s.status==='lobby')return;if(s.status==='playing'&&!s.players.some(p=>p.uid===uid)){leftRoomView=true;render();return;}
 if(s.status==='done'&&s.result){const effectKey=`${s.round}-${s.result.reflected?'reflect':s.result.tenhou?'tenhou':'normal'}`;if(shownResultEffectKey!==effectKey){shownResultEffectKey=effectKey;showYanivCutin(Boolean(s.result.reflected),Boolean(s.result.tenhou));}}else if(s.status==='playing'){shownResultEffectKey='';}$('roundText').textContent=`第${s.round}ゲーム｜1点差につき${s.rate}点｜今回の先手：${s.players.find(p=>p.uid===s.starterUid)?.name||'?'}${s.status==='playing'&&(s.turnsCompleted??0)<s.players.length?'｜天和対象：1周目':''}${s.turn===playerIndex()&&s.phase==='discard'&&s.status==='playing'?'（あなたの番）':''}`;$('deckCount').textContent=s.deckCount+'枚';const face=$('faceCards');face.replaceChildren();(s.shown||[s.face]).forEach(c=>{let x=document.createElement('div');x.className='card';x.textContent=label(c);face.append(x)});
 const pi=playerIndex(),mineTurn=pi===s.turn,isDiscard=mineTurn&&s.phase==='discard'&&s.status==='playing',isDraw=mineTurn&&s.phase==='draw'&&s.status==='playing';$('players').replaceChildren();s.players.forEach((p,i)=>{const x=document.createElement('div');x.className='player'+(s.turn===i?' active':'');x.style.setProperty('--player-color',playerColors[i%playerColors.length]);x.textContent=`${p.name}${p.uid===uid?'（自分）':''}${connectionOnline&&!presenceOnline[p.uid]?'（通信待ち）':''}｜手札 ${s.handCounts?.[i]??'?'} 枚｜累計 ${p.score>=0?'+':''}${p.score}点`;$('players').append(x)});renderScoreboard($('scoreBoard'),s.scoreBoard,s.players);const queued=Boolean(s.exitPending?.[uid]);$('reserveExit').classList.toggle('queued',queued);$('reserveExit').textContent=queued?'このゲーム終了後に退出：ON（タップで取消）':'このゲーム終了後に退出：OFF';$('reserveExit').disabled=!s.players.some(p=>p.uid===uid);
 const pickup=s.lastPickup;const pickupPlayer=pickup&&s.players.find(p=>p.uid===pickup.uid);$('lastPickup').textContent=pickupPlayer?`直近の場札取得：${pickupPlayer.name} が ${label(pickup.card)} を取りました`:'直近の場札取得：まだありません';
@@ -312,6 +391,7 @@ async function startNextRound(){
   const exiting=state.exitPending||{};
   const survivors=previous.filter(p=>!exiting[p.uid]);
   const board=state.scoreBoard;
+  const previousHistory=state.history||[];
   for(const p of previous)if(exiting[p.uid])board[p.uid]={name:p.name,score:p.score,departed:true};
   // Only the original host owns the live deck. If that host leaves, close the room
   // instead of silently pretending another client has the host's private deck.
@@ -322,6 +402,7 @@ async function startNextRound(){
   }
   const startUid=survivors.some(p=>p.uid===nextStarterUid)?nextStarterUid:survivors[0].uid;
   state=initialGame(survivors.map(({uid,name})=>({uid,name})),state.round+1,survivors.map(p=>p.score),startUid,state.baseRate,board);
+  state.history=structuredClone(previousHistory);
   state.hostUid=uid;state.hostToken=hostToken;
   await publish();
   if(exiting[uid])await transferHost(survivors[0].uid);
