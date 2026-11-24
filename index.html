@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>やにぶ ネット対戦（ルーム共有対応版）</title>
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>やにぶ ネット対戦（切断復帰・ホスト引き継ぎ版）</title>
 <style>*{box-sizing:border-box}body{margin:0;background:#104b30;color:white;font:16px system-ui,sans-serif}main{max-width:740px;margin:auto;padding:14px}h1{text-align:center;font-size:26px}.panel{background:#ffffff18;border:1px solid #ffffff29;padding:16px;margin:12px 0;border-radius:14px}input,button{font-size:16px;padding:12px;border-radius:9px;border:0;margin:4px}input{max-width:100%;width:235px}button{background:#ffda53;color:#222;font-weight:700}button:disabled{opacity:.42}.cards{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.card{width:49px;height:67px;display:grid;place-items:center;border-radius:8px;background:white;color:#222;font-size:20px;font-weight:800;box-shadow:0 2px 4px #0004;cursor:pointer}.card.chosen{outline:4px solid #f8b400;transform:translateY(-6px)}.card.back{background:#2b3b85;color:white}.players{display:grid;grid-template-columns:1fr 1fr;gap:8px}.player{padding:12px;border-radius:12px;background:#ffffff18}.active{outline:2px solid #ffe177}small,.muted{opacity:.8}.hidden{display:none!important}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.status{font-weight:700}.error{color:#ffb5b5}table{width:100%;border-collapse:collapse}td,th{padding:7px;border-bottom:1px solid #ffffff28;text-align:left}.player{border-left:7px solid var(--player-color,#ddd)}.player.active{box-shadow:0 0 0 2px #ffe177 inset}.color-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--player-color);margin-right:7px;vertical-align:middle}.result-title{font-size:21px;font-weight:800}.result-row{display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #ffffff35}
 @media(max-width:520px){.players{grid-template-columns:1fr}.result-row{gap:8px;flex-wrap:wrap}.result-row>span:last-child{margin-left:auto}}
 /* Only the owner of a qualifying last card sees this brief cut-in. */
@@ -35,16 +35,16 @@
 .info{background:#0b3e2b;padding:9px;border-radius:8px;margin-top:8px}.share-area{margin:12px 0;padding:12px;background:#0b3e2b;border:1px solid #ffffff33;border-radius:10px}.share-area .share-code{font-size:24px;font-weight:900;letter-spacing:.13em;user-select:all}.share-area button{margin:7px 5px 2px 0}.share-tip{font-size:13px;opacity:.85;margin:8px 0 0}</style>
 </head><body><div id="luckyCutin" class="lucky-cutin hidden" aria-live="polite"><div class="cutin-core"><div class="cutin-glow"></div><div id="luckyCard" class="cutin-card"></div><div id="luckyMessage" class="cutin-text"></div></div></div><div id="yanivCutin" class="yaniv-cutin hidden" aria-live="assertive"></div><main><h1>やにぶ <small>ネット対戦試作</small></h1><div id="connection" class="panel status">Firebaseへ接続中…</div>
 <section id="lobby" class="panel hidden"><h2>ルーム作成・参加</h2><div>名前 <input id="playerName" maxlength="18" placeholder="プレイヤー名" value="プレイヤー"></div><div class="rate-panel"><label for="baseRate">ルーム作成時の基本レート</label><select id="baseRate"><option value="50">50（標準）</option><option value="100">100</option><option value="150">150</option><option value="200">200</option><option value="250">250</option><option value="300">300</option></select></div><p class="muted">初期場札がJ・Q・K（ピクチャー）の場合は＋50。ジョーカーの場合は引き直し1回につき＋50。</p><div class="row"><button id="create">ルーム作成</button><input id="roomCode" placeholder="6桁の数字" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code"><button id="join">参加</button></div><p class="muted">同じルームコードを友達に伝えてください。2〜5人で遊べます。</p></section>
-<section id="waiting" class="panel hidden"><h2>ルーム <span id="roomLabel"></span></h2><div id="lobbyRate" class="warn-rate"></div><div id="memberList"></div><div class="share-area"><div>友達を招待</div><div class="share-code" id="inviteCode"></div><div class="row"><button id="shareRoom" type="button">📤 LINEなどで共有</button><button id="copyInvite" type="button">招待文をコピー</button></div><p class="share-tip">共有できない場合は招待文をコピーしてLINEなどに貼り付けてください。</p></div><button id="startGame">対戦開始（ホストのみ）</button><button id="leaveRoom">退出する</button><p class="muted">ホストの画面は閉じないでください。通信途中でホストが退出すると進行できなくなります。</p></section>
+<section id="waiting" class="panel hidden"><h2>ルーム <span id="roomLabel"></span></h2><div id="lobbyRate" class="warn-rate"></div><div id="memberList"></div><div class="share-area"><div>友達を招待</div><div class="share-code" id="inviteCode"></div><div class="row"><button id="shareRoom" type="button">📤 LINEなどで共有</button><button id="copyInvite" type="button">招待文をコピー</button></div><p class="share-tip">共有できない場合は招待文をコピーしてLINEなどに貼り付けてください。</p></div><button id="startGame">対戦開始（ホストのみ）</button><button id="leaveRoom">退出する</button><p class="muted">通信が切れても同じ端末・ブラウザで復帰できます。ホスト不在時は約20秒で参加者に自動引き継ぎします。</p></section>
 <section id="game" class="hidden"><div class="panel"><div id="roundText"></div><div class="players" id="players"></div><div class="row"><button id="reserveExit" class="exit-toggle" type="button">このゲーム終了後に退出：OFF</button></div><div class="info" id="lastPickup">直近の場札取得：まだありません</div><div class="scoreboard"><strong>部屋の累積得点（退出者含む）</strong><div id="scoreBoard"></div></div></div>
 <div class="panel"><div class="row"><div><strong>山札</strong><div class="card back" id="deckCard">🂠</div><small id="deckCount"></small></div><div><strong>場札</strong><div id="faceCards" class="cards"></div></div></div><div class="row"><button id="drawDeck">山札から引く</button><button id="drawFace">捨てる前の場札を取る</button></div></div>
 <div class="panel"><div id="status" class="status"></div><h3>自分の手札 <span id="myCount"></span></h3><div class="row"><button id="sortHand">数字の大きい順に並べる：OFF</button></div><div id="myHand" class="cards"></div><div class="row"><button id="discard">選択したカードを捨てる</button><button id="yaniv">ヤニブ宣言</button></div><small>自分のターンの開始時、手札合計が5点以下ならヤニブを宣言できます。最初の1周目に捨てる前のヤニブが成功すると天和（返しと同じ2倍得点）です。返された場合は通常のヤニブ返しが成立します。捨てる場合はカードを選択 → 捨てる → 山札または捨てる前の場札から1枚取ります。</small></div>
 <div id="result" class="panel hidden"><h2>ゲーム結果</h2><div id="resultText"></div><p id="countdown" class="status"></p><button id="resultOk">OK（確認しました）</button><p class="muted">全員がOKを押したらすぐ開始。押さない人がいても10秒後に自動開始します。</p></div></section><section id="roomFinished" class="closed-panel hidden"><h2 id="finishedTitle">部屋の対戦が終了しました</h2><div id="finishedScore"></div><p id="finishedMessage"></p><button id="backLobby" type="button">ロビー画面へ戻る</button></section>
-<div class="panel"><strong>お知らせ</strong><div id="notice" aria-live="polite">ルームに参加してください。</div></div></main>
+<div class="panel" id="recoveryPanel"><strong>接続・進行状況</strong><div id="recoveryStatus">参加後に表示します</div><button id="retryReconnect" type="button">ルームに再接続する</button></div><div class="panel"><strong>お知らせ</strong><div id="notice" aria-live="polite">ルームに参加してください。</div></div></main>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getAuth,signInAnonymously,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import {getDatabase,ref,get,set,update,onValue,onChildAdded,push,remove} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js';
+import {getDatabase,ref,get,set,update,onValue,onChildAdded,push,remove,runTransaction,onDisconnect,serverTimestamp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js';
 const firebaseConfig={apiKey:'AIzaSyD7yUoiaQBtGcPqM6g4O_G4IL57s3Paujk',authDomain:'vinay-ac95d.firebaseapp.com',databaseURL:'https://vinay-ac95d-default-rtdb.firebaseio.com/',projectId:'vinay-ac95d',storageBucket:'vinay-ac95d.firebasestorage.app',messagingSenderId:'417363884808',appId:'1:417363884808:web:e38cd0bf5f27c003938abd',measurementId:'G-1RDYZS9GP5'};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);
 const $=x=>document.getElementById(x);const show=(id,yes)=>$(id).classList.toggle('hidden',!yes);const notice=x=>{$('notice').textContent=x};const ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
@@ -53,6 +53,12 @@ const shuffle=a=>{for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(
 const fresh=()=>shuffle([...ranks.flatMap(r=>Array.from({length:4},(_,i)=>({r,id:r+'-'+i}))),{r:'Joker',id:'J-0'},{r:'Joker',id:'J-1'}]);
 const sum=h=>h.reduce((s,c)=>s+val(c),0);const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let uid=null,room=null,host=false,publicState=null,members={},ownHand=[],state=null,selected=new Set(),listenerStops=[],processing=false,actionSeen=new Set(),handFingerprint="";
+let hostToken=null,hostStarting=false,hostTransition=false,connectionOnline=true,lastHostCheck=0,lastLeaseRenew=0,presenceStop=null,ownPresence=null;
+const LEASE_MS=18000,HEARTBEAT_MS=5000,ROOM_KEY="yanibu-last-room-v3";
+let serverClockOffset=0;
+const serverNow=()=>Date.now()+serverClockOffset;
+onValue(ref(db,'.info/serverTimeOffset'),snap=>{serverClockOffset=Number(snap.val())||0;});
+const instanceToken=()=>crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random();
 const playerColors=['#ff9696','#83c7ff','#ffe381','#c8a9ff','#a5e6ac'];
 let sortDescending=false,resultRound=null,startingNext=false,actionStops=[];
 let cutinTimer=null,yanivCutinTimer=null,handInitialized=false,previousHandCount=null,shownResultEffectKey="";let leftRoomView=false;
@@ -72,8 +78,93 @@ try{const incoming=new URL(window.location.href).searchParams.get('room');if(inc
 const path=s=>ref(db,'rooms/'+room+'/'+s),playerIndex=()=>publicState?.players?.findIndex(p=>p.uid===uid)??-1;
 function valid(cards){if(!cards.length)return false;if(cards.length===1)return true;const non=cards.filter(c=>c.r!=='Joker'),j=cards.length-non.length;if(non.length&&non.every(c=>val(c)===val(non[0])))return true;if(cards.length<3)return false;const nums=non.map(val);if(new Set(nums).size!==nums.length)return false;for(let n=1;n+cards.length-1<=13;n++)if(nums.every(x=>x>=n&&x<n+cards.length))return true;return false;}
 function initialGame(players,round=1,scores=null,startUid=null,baseRate=50,scoreBoard=null){const startTurn=Math.max(0,players.findIndex(p=>p.uid===startUid));let deck,face,rate=baseRate,hands;let tries=0;do{deck=fresh();hands=players.map(()=>[]);for(let j=0;j<5;j++)hands.forEach(h=>h.push(deck.pop()));face=deck.pop();if(face.r==='Joker')rate+=50;tries++;}while(face.r==='Joker'&&tries<100);if(['J','Q','K'].includes(face.r))rate+=50;return {players:players.map((p,i)=>({...p,hand:hands[i],score:scores?.[i]??0})),baseRate,scoreBoard:scoreBoard||Object.fromEntries(players.map((p,i)=>[p.uid,{name:p.name,score:scores?.[i]??0,departed:false}])),exitPending:{},deck,discard:[face],face,shown:[face],oldFace:null,round,rate,turnsCompleted:0,turn:startTurn,starterUid:players[startTurn].uid,phase:'discard',status:'playing',result:null,lastPickup:null};}
-function pub(){return {hostUid:state.hostUid||state.players[0]?.uid,status:state.status,baseRate:state.baseRate,scoreBoard:state.scoreBoard,exitPending:state.exitPending||{},players:state.players.map(p=>({uid:p.uid,name:p.name,score:p.score})),handCounts:state.players.map(p=>p.hand.length),deckCount:state.deck.length,face:state.face,shown:state.shown,oldFace:state.phase==='draw'?state.oldFace:null,round:state.round,rate:state.rate,turnsCompleted:state.turnsCompleted,turn:state.turn,starterUid:state.starterUid,phase:state.phase,result:state.result||null,lastPickup:state.lastPickup||null,updatedAt:Date.now()};}
-async function publish(){if(!host||!state)return;const writes={'public':pub()};state.players.forEach(p=>writes['private/'+p.uid+'/hand']=p.hand);await update(ref(db,'rooms/'+room),writes);}
+function pub(){return {hostToken:hostToken||state.hostToken||null,leaseUntil:serverNow()+LEASE_MS,hostUid:state.hostUid||state.players[0]?.uid,status:state.status,baseRate:state.baseRate,scoreBoard:state.scoreBoard,exitPending:state.exitPending||{},players:state.players.map(p=>({uid:p.uid,name:p.name,score:p.score})),handCounts:state.players.map(p=>p.hand.length),deckCount:state.deck.length,face:state.face,shown:state.shown,oldFace:state.phase==='draw'?state.oldFace:null,round:state.round,rate:state.rate,turnsCompleted:state.turnsCompleted,turn:state.turn,starterUid:state.starterUid,phase:state.phase,result:state.result||null,lastPickup:state.lastPickup||null,updatedAt:Date.now()};}
+async function publish(){
+ if(!host||!state||!hostToken||publicState?.hostToken!==hostToken)throw Error('ホスト権限が切り替わりました');
+ state.hostUid=uid;state.hostToken=hostToken;
+ // Commit the entire game and its public/private projections atomically.
+ const writes={'engine':structuredClone(state),'public':pub()};
+ state.players.forEach(p=>writes['private/'+p.uid+'/hand']=p.hand);
+ await update(ref(db,'rooms/'+room),writes);
+ lastLeaseRenew=Date.now();
+}
+// Host heartbeat is separately committed without modifying the game snapshot.
+async function renewLease(){
+ if(!host||!hostToken||!room||hostTransition||document.hidden)return;
+ const now=Date.now();if(now-lastLeaseRenew<HEARTBEAT_MS)return;
+ lastLeaseRenew=now;
+ try{
+  const claim=await runTransaction(path('public'),current=>{
+   if(!current||current.hostUid!==uid||current.hostToken!==hostToken)return;
+   current.leaseUntil=serverNow()+LEASE_MS;return current;
+  },{applyLocally:false});
+  if(!claim.committed){host=false;hostToken=null;stopHosting();}
+ }catch(e){lastLeaseRenew=0;}
+}
+function stopHosting(){actionStops.forEach(f=>f());actionStops=[];queue.length=0;actionSeen.clear();state=null;}
+async function beginHosting(){
+ if(hostStarting||!room||!host||!hostToken||!publicState||!['lobby','playing','done'].includes(publicState.status))return;
+ hostStarting=true;
+ try{
+  const snap=await get(path('engine'));
+  if(!snap.exists())throw Error('復旧用のゲーム情報がありません');
+  if(!host||publicState?.hostUid!==uid||publicState?.hostToken!==hostToken)return;
+  state=snap.val();state.hostUid=uid;state.hostToken=hostToken;
+  // A prior host may have already committed the action before disconnecting.
+  state.processedActions=state.processedActions||{};
+  watchActions();
+  notice('ホストとしてゲームの進行を再開しました');
+ }catch(e){notice('ゲーム復帰に失敗: '+e.message)}finally{hostStarting=false;}
+}
+async function checkHostHandoff(){
+ if(!room||host||!connectionOnline||!publicState||!['lobby','playing','done'].includes(publicState.status))return;
+ if(!(publicState.status==='lobby'?Boolean(members[uid]):publicState.players?.some(p=>p.uid===uid))||leftRoomView)return;
+ const now=serverNow();if(Date.now()-lastHostCheck<2600||now<(publicState.leaseUntil||0)+1800)return;
+ // Prefer members with earlier seats. A disconnected member is skipped.
+ const active=(publicState.status==='lobby'?Object.entries(members).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0)).map(([id])=>id):publicState.players.map(p=>p.uid)).filter(id=>id!==publicState.hostUid&&members[id]&&presenceOnline[id]);
+ if(!active.length||active[0]!==uid)return;
+ lastHostCheck=Date.now();
+ try{
+  const token=instanceToken();
+  const result=await runTransaction(path('public'),current=>{
+   if(!current||!['lobby','playing','done'].includes(current.status)||serverNow()<Number(current.leaseUntil||0)+1800)return;
+   if(current.status==='lobby'?!members[uid]:!current.players?.some(p=>p.uid===uid))return;
+   current.hostUid=uid;current.hostToken=token;current.leaseUntil=serverNow()+LEASE_MS;
+   return current;
+  },{applyLocally:false});
+  if(result.committed){host=true;hostToken=token;publicState=result.snapshot.val();await beginHosting();}
+ }catch(e){notice('ホスト引き継ぎ待機中: '+e.message)}
+}
+let presenceOnline={};
+async function startPresence(){
+ if(!room||!uid)return;
+ const r=path('presence/'+uid);
+ try{
+  await onDisconnect(r).remove();
+  await set(r,{online:true,at:serverTimestamp()});
+ }catch(e){notice('接続状態の登録に失敗: '+e.message)}
+}
+async function startRoomConnection(){
+ if(presenceStop){presenceStop();presenceStop=null;}
+ presenceStop=onValue(ref(db,'.info/connected'),snap=>{
+  connectionOnline=Boolean(snap.val());
+  $('connection').textContent=connectionOnline?'接続済み（匿名認証）':'通信が切断されました。再接続しています…';
+  if(connectionOnline&&room)startPresence();
+  if(connectionOnline&&host&&!state)beginHosting();
+  updateRecoveryStatus();
+ });
+}
+function updateRecoveryStatus(){
+ const target=$('recoveryStatus');if(!target)return;
+ if(!room){target.textContent='未参加';return;}
+ if(!connectionOnline){target.textContent='オフライン：ネットワーク回復後に同期します';return;}
+ if(publicState?.status==='closed'){target.textContent='この部屋の対戦は終了しています';return;}
+ if(publicState?.status==='lobby'){target.textContent='待機中：再読み込み後も同じルームに復帰できます';return;}
+ if(host){target.textContent=state?'あなたがホストです（進行データ保存中）':'あなたがホストです（復旧データ読み込み中）';return;}
+ const rem=Math.max(0,Math.ceil(((publicState?.leaseUntil||0)-serverNow())/1000));
+ target.textContent=rem?'ゲームに接続中。ホスト応答期限まで約'+rem+'秒':'ホストの応答待ち・引き継ぎ確認中';
+}
+
 function recycle(){if(state.deck.length)return true;const remaining=state.discard.filter(c=>c.id!==state.face.id);if(!remaining.length)return false;state.deck=shuffle(remaining);state.discard=[state.face];return true;}
 // Only players tied for the highest hand total among non-winners pay.
 // If there is a tie, split the amount as fairly as possible in 50-point units.
@@ -128,33 +219,62 @@ if(!state||state.status!=='playing')throw Error('対戦中ではありません'
 if(a.type==='discard'){if(state.phase!=='discard')throw Error('今は捨てられません');const inds=a.indices;if(!Array.isArray(inds)||!inds.length||new Set(inds).size!==inds.length||inds.some(k=>!Number.isInteger(k)||k<0||k>=p.hand.length))throw Error('カード選択が不正です');const cards=inds.map(k=>p.hand[k]);if(!valid(cards))throw Error('この組み合わせは捨てられません');inds.sort((a,b)=>b-a).forEach(k=>p.hand.splice(k,1));state.oldFace=state.face;state.shown=cards;const non=cards.filter(c=>c.r!=='Joker');state.face=non.length?non.reduce((a,b)=>val(a)>val(b)?a:b):cards[0];state.discard.push(...cards);state.phase='draw';return;}
 if(a.type==='draw'){if(state.phase!=='draw')throw Error('先に捨ててください');let c;if(a.source==='face'){c=state.oldFace;if(!c)throw Error('場札を取れません');state.discard=state.discard.filter(x=>x.id!==c.id);}else if(a.source==='deck'){if(!recycle())throw Error('山札がありません');c=state.deck.pop();}else throw Error('引く場所が不正です');p.hand.push(c);if(a.source==='face')state.lastPickup={uid:user,card:c};state.oldFace=null;state.phase='discard';state.turn=(i+1)%state.players.length;state.turnsCompleted=(state.turnsCompleted??0)+1;return;}
 throw Error('操作が不正です');}
-async function handleAction(snap){if(!host||!state||processing)return;processing=true;try{const actionRef=snap.ref,user=snap.ref.parent.key,a=snap.val();try{action(user,a);await publish();if(a?.type==='result_ok'&&allPlayersAcknowledged())await startNextRound();}catch(e){notice('操作を処理できませんでした: '+e.message);}await remove(actionRef);}catch(e){notice('同期エラー: '+e.message)}finally{processing=false;}}
+async function handleAction(snap){
+ if(!host||!state||processing||!hostToken||publicState?.hostToken!==hostToken)return;
+ processing=true;
+ const actionRef=snap.ref,user=snap.ref.parent.key,a=snap.val();
+ try{
+  if(!a){return;}
+  if(state.processedActions?.[snap.key]){await remove(actionRef);return;}
+  const before=structuredClone(state);
+  try{
+   action(user,a);
+   state.processedActions=state.processedActions||{};
+   state.processedActions[snap.key]=true;
+   // Keep a bounded journal to avoid unbounded Firebase data growth.
+   const keys=Object.keys(state.processedActions);
+   if(keys.length>250)for(const k of keys.slice(0,keys.length-250))delete state.processedActions[k];
+   await publish();
+   await remove(actionRef);
+   if(a.type==='result_ok'&&allPlayersAcknowledged())await startNextRound();
+  }catch(e){state=before;notice('操作を処理できませんでした: '+e.message);if(host&&publicState?.hostToken===hostToken&&!(String(e.message).includes('ホスト権限')))await remove(actionRef).catch(()=>{});}
+ }catch(e){notice('同期エラー: '+e.message)}finally{processing=false;}
+}
 function watchActions(){// actions/{uid}/{key}: listen to each member queue
-if(actionStops.length)return;state.players.forEach(p=>{actionStops.push(onChildAdded(path('actions/'+p.uid),snap=>{if(!actionSeen.has(snap.key)){actionSeen.add(snap.key);queue.push(snap);drain();}}));});}
+if(actionStops.length)return;actionSeen.clear();state.players.forEach(p=>{actionStops.push(onChildAdded(path('actions/'+p.uid),snap=>{if(!actionSeen.has(snap.key)){actionSeen.add(snap.key);queue.push(snap);drain();}}));});}
 const queue=[];let draining=false;async function drain(){if(draining)return;draining=true;while(queue.length){let snap=queue.shift();await handleAction(snap)}draining=false;}
 function renderScoreboard(target,board,active){
  target.replaceChildren();const activeIds=new Set((active||[]).map(p=>p.uid));
  const rows=Object.entries(board||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
  for(const p of rows){const line=document.createElement('div');line.className='score-line';const name=document.createElement('span');name.textContent=p.name+(p.departed||!activeIds.has(p.id)?'（退出）':'');const score=document.createElement('b');score.textContent=(p.score>=0?'+':'')+p.score+'点';line.append(name,score);target.append(line);}
 }
-function render(){const s=publicState;if(!s)return;host=s.hostUid===uid;show('waiting',s.status==='lobby');show('game',!leftRoomView&&(s.status==='playing'||s.status==='done'));show('roomFinished',leftRoomView||s.status==='closed');$('roomLabel').textContent=room;$('inviteCode').textContent=room;$('memberList').textContent=Object.values(members).map(m=>m.name).join(' / ');$('startGame').disabled=!host||Object.keys(members).length<2;$('lobbyRate').textContent=`基本レート：${s.baseRate||50}`;if(s.status==='closed'||leftRoomView){$('finishedTitle').textContent=s.status==='closed'?'部屋の対戦が終了しました':'退出しました';$('finishedMessage').textContent=s.status==='closed'?'累積得点はこの部屋の記録として残っています。':'あなたの得点は部屋の記録に残っています。';$('finishedScore').replaceChildren();renderScoreboard($('finishedScore'),s.scoreBoard,s.players);return;}
+function render(){const s=publicState;if(!s)return;host=s.hostUid===uid;show('waiting',s.status==='lobby');show('game',!leftRoomView&&(s.status==='playing'||s.status==='done'));show('roomFinished',leftRoomView||s.status==='closed');$('roomLabel').textContent=room;$('inviteCode').textContent=room;$('memberList').textContent=Object.values(members).map(m=>m.name).join(' / ');$('startGame').disabled=!host||!connectionOnline||Object.keys(members).length<2;$('lobbyRate').textContent=`基本レート：${s.baseRate||50}`;if(s.status==='closed'||leftRoomView){$('finishedTitle').textContent=s.status==='closed'?'部屋の対戦が終了しました':'退出しました';$('finishedMessage').textContent=s.status==='closed'?'累積得点はこの部屋の記録として残っています。':'あなたの得点は部屋の記録に残っています。';$('finishedScore').replaceChildren();renderScoreboard($('finishedScore'),s.scoreBoard,s.players);return;}
 if(s.status==='lobby')return;if(s.status==='playing'&&!s.players.some(p=>p.uid===uid)){leftRoomView=true;render();return;}
 if(s.status==='done'&&s.result){const effectKey=`${s.round}-${s.result.reflected?'reflect':s.result.tenhou?'tenhou':'normal'}`;if(shownResultEffectKey!==effectKey){shownResultEffectKey=effectKey;showYanivCutin(Boolean(s.result.reflected),Boolean(s.result.tenhou));}}else if(s.status==='playing'){shownResultEffectKey='';}$('roundText').textContent=`第${s.round}ゲーム｜1点差につき${s.rate}点｜今回の先手：${s.players.find(p=>p.uid===s.starterUid)?.name||'?'}${s.status==='playing'&&(s.turnsCompleted??0)<s.players.length?'｜天和対象：1周目':''}${s.turn===playerIndex()&&s.phase==='discard'&&s.status==='playing'?'（あなたの番）':''}`;$('deckCount').textContent=s.deckCount+'枚';const face=$('faceCards');face.replaceChildren();(s.shown||[s.face]).forEach(c=>{let x=document.createElement('div');x.className='card';x.textContent=label(c);face.append(x)});
-const pi=playerIndex(),mineTurn=pi===s.turn,isDiscard=mineTurn&&s.phase==='discard'&&s.status==='playing',isDraw=mineTurn&&s.phase==='draw'&&s.status==='playing';$('players').replaceChildren();s.players.forEach((p,i)=>{const x=document.createElement('div');x.className='player'+(s.turn===i?' active':'');x.style.setProperty('--player-color',playerColors[i%playerColors.length]);x.textContent=`${p.name}${p.uid===uid?'（自分）':''}｜手札 ${s.handCounts?.[i]??'?'} 枚｜累計 ${p.score>=0?'+':''}${p.score}点`;$('players').append(x)});renderScoreboard($('scoreBoard'),s.scoreBoard,s.players);const queued=Boolean(s.exitPending?.[uid]);$('reserveExit').classList.toggle('queued',queued);$('reserveExit').textContent=queued?'このゲーム終了後に退出：ON（タップで取消）':'このゲーム終了後に退出：OFF';$('reserveExit').disabled=!s.players.some(p=>p.uid===uid);
+const pi=playerIndex(),mineTurn=pi===s.turn,isDiscard=mineTurn&&s.phase==='discard'&&s.status==='playing',isDraw=mineTurn&&s.phase==='draw'&&s.status==='playing';$('players').replaceChildren();s.players.forEach((p,i)=>{const x=document.createElement('div');x.className='player'+(s.turn===i?' active':'');x.style.setProperty('--player-color',playerColors[i%playerColors.length]);x.textContent=`${p.name}${p.uid===uid?'（自分）':''}${connectionOnline&&!presenceOnline[p.uid]?'（通信待ち）':''}｜手札 ${s.handCounts?.[i]??'?'} 枚｜累計 ${p.score>=0?'+':''}${p.score}点`;$('players').append(x)});renderScoreboard($('scoreBoard'),s.scoreBoard,s.players);const queued=Boolean(s.exitPending?.[uid]);$('reserveExit').classList.toggle('queued',queued);$('reserveExit').textContent=queued?'このゲーム終了後に退出：ON（タップで取消）':'このゲーム終了後に退出：OFF';$('reserveExit').disabled=!s.players.some(p=>p.uid===uid);
 const pickup=s.lastPickup;const pickupPlayer=pickup&&s.players.find(p=>p.uid===pickup.uid);$('lastPickup').textContent=pickupPlayer?`直近の場札取得：${pickupPlayer.name} が ${label(pickup.card)} を取りました`:'直近の場札取得：まだありません';
 $('myCount').textContent=`${ownHand.length}枚（合計${sum(ownHand)}点）`;$('myHand').replaceChildren();const displayed=ownHand.map((c,i)=>({c,i}));if(sortDescending)displayed.sort((a,b)=>val(b.c)-val(a.c)||a.i-b.i);displayed.forEach(({c,i})=>{let x=document.createElement('div');x.className='card'+(selected.has(i)?' chosen':'');x.textContent=label(c);x.onclick=()=>{if(!isDiscard)return;selected.has(i)?selected.delete(i):selected.add(i);render()};$('myHand').append(x)});
 $('sortHand').textContent=`数字の大きい順に並べる：${sortDescending?'ON':'OFF'}`;
 
 
 $('status').textContent=s.status==='done'?'このゲームは終了しました':mineTurn?(isDraw?'1枚取ってください':'捨てるか、ヤニブを宣言してください'):`${s.players[s.turn]?.name}のターン`;
-$('discard').disabled=!isDiscard||selected.size===0;$('yaniv').disabled=!isDiscard||sum(ownHand)>5;$('drawDeck').disabled=!isDraw;$('drawFace').disabled=!isDraw||!s.oldFace;$('drawFace').textContent=s.oldFace?'元の場札 '+label(s.oldFace)+' を取る':'元の場札を取る';show('result',s.status==='done');
+$('discard').disabled=!isDiscard||selected.size===0;$('yaniv').disabled=!isDiscard||ownHand.length===0||sum(ownHand)>5;$('drawDeck').disabled=!isDraw;$('drawFace').disabled=!isDraw||!s.oldFace;$('drawFace').textContent=s.oldFace?'元の場札 '+label(s.oldFace)+' を取る':'元の場札を取る';show('result',s.status==='done');
 if(s.status==='done'&&s.result){const r=s.result;if(resultRound!==s.round){resultRound=s.round;}
 let html=`<div class="result-title">${r.reflected?'ヤニブ返し！':r.tenhou?'天和成立！':'ヤニブ成立！'}</div><p>勝者：${esc(s.players[r.winner]?.name||'?')} ／ 次ゲームの先手</p>`;
 s.players.forEach((p,i)=>{const diff=r.deltas?.[i]??((i===r.winner?r.amount:0)-(i===r.payer?r.amount:0));html+=`<div class="result-row"><span><span class="color-dot" style="--player-color:${playerColors[i%playerColors.length]}"></span>${esc(p.name)}（手札合計 ${r.scores[i]}）</span><span>${diff>=0?'+':''}${diff}点・累計 ${p.score>=0?'+':''}${p.score}</span></div>`;});$('resultText').innerHTML=html;const ack=Boolean(r.acks?.[uid]);$('resultOk').disabled=ack;$('resultOk').textContent=ack?'確認済み ✓':'OK（確認しました）';updateCountdown();}
 }
-async function joinRoom(code,create=false){room=String(code).trim();if(!/^[0-9]{6}$/.test(room)){notice('ルーム番号は数字6桁で入力してください');return;}const name=$('playerName').value.trim().slice(0,18)||'プレイヤー';try{if(create){const baseRate=Number($('baseRate').value);if(![50,100,150,200,250,300].includes(baseRate))throw Error('レートが不正です');const existed=await get(path('public'));if(existed.exists())throw Error('このルームコードは使用済みです');await set(path('public'),{hostUid:uid,status:'lobby',baseRate,scoreBoard:{},exitPending:{},players:[],handCounts:[],updatedAt:Date.now()});}
-const roomSnap=await get(path('public'));if(!roomSnap.exists())throw Error('ルームが存在しません');if(roomSnap.val().status!=='lobby')throw Error('対戦開始後の新規参加はできません');if(!create){const rate=Number(roomSnap.val().baseRate||50);if(rate!==50&&!confirm(`注意：この部屋は標準レート50ではなく【${rate}】です。\n\n初期場札がJ・Q・Kなら＋50、ジョーカーによる引き直しも1回につき＋50です。\nこのレートで参加しますか？`)){notice('参加をキャンセルしました');room=null;return;}}const ms=await get(path('members'));if(!ms.hasChild(uid)&&ms.size>=5)throw Error('ルームは5人までです');await set(path('members/'+uid),{name,joinedAt:Date.now()});host=roomSnap.val().hostUid===uid;leftRoomView=false;show('lobby',false);show('waiting',true);notice('接続しました。ルームコードを共有してください。');listenerStops.forEach(f=>f());listenerStops=[];actionStops.forEach(f=>f());actionStops=[];actionSeen.clear();
-listenerStops.push(onValue(path('public'),snap=>{const prev=publicState;publicState=snap.val();host=publicState?.hostUid===uid;if(prev?.round!==publicState?.round||prev?.phase!==publicState?.phase)selected.clear();if(publicState?.status==='playing'&&prev?.status==='done'&&!publicState.players.some(p=>p.uid===uid))leftRoomView=true;if(host&&publicState?.status==='playing'&&state?.status==='playing'&&state.round===publicState.round&&!actionStops.length)watchActions();render()}));listenerStops.push(onValue(path('members'),snap=>{members=snap.val()||{};render()}));listenerStops.push(onValue(path('private/'+uid+'/hand'),snap=>{
+async function joinRoom(code,create=false,resume=false){room=String(code).trim();if(!/^[0-9]{6}$/.test(room)){notice('ルーム番号は数字6桁で入力してください');return;}const name=$('playerName').value.trim().slice(0,18)||'プレイヤー';try{if(create){const baseRate=Number($('baseRate').value);if(![50,100,150,200,250,300].includes(baseRate))throw Error('レートが不正です');const existed=await get(path('public'));if(existed.exists())throw Error('このルームコードは使用済みです');await set(path('public'),{hostUid:uid,hostToken:instanceToken(),leaseUntil:serverNow()+LEASE_MS,status:'lobby',baseRate,scoreBoard:{},exitPending:{},players:[],handCounts:[],updatedAt:Date.now()});}
+const roomSnap=await get(path('public'));if(!roomSnap.exists())throw Error('ルームが存在しません');if(roomSnap.val().status!=='lobby'&&!resume)throw Error('対戦開始後の新規参加はできません');if(resume&&!((await get(path('members/'+uid))).exists()))throw Error('以前の参加記録が見つかりません');if(!create&&!resume){const rate=Number(roomSnap.val().baseRate||50);if(rate!==50&&!confirm(`注意：この部屋は標準レート50ではなく【${rate}】です。\n\n初期場札がJ・Q・Kなら＋50、ジョーカーによる引き直しも1回につき＋50です。\nこのレートで参加しますか？`)){notice('参加をキャンセルしました');room=null;return;}}const ms=await get(path('members'));if(!ms.hasChild(uid)&&ms.size>=5)throw Error('ルームは5人までです');if(!resume)await set(path('members/'+uid),{name,joinedAt:Date.now()});host=roomSnap.val().hostUid===uid;hostToken=host?roomSnap.val().hostToken||null:null;leftRoomView=false;localStorage.setItem(ROOM_KEY,room);await startRoomConnection();show('lobby',false);show('waiting',true);notice('接続しました。ルームコードを共有してください。');listenerStops.forEach(f=>f());listenerStops=[];actionStops.forEach(f=>f());actionStops=[];actionSeen.clear();state=null;hostStarting=false;processing=false;handInitialized=false;handFingerprint='';ownHand=[];
+listenerStops.push(onValue(path('public'),snap=>{
+ const prev=publicState;publicState=snap.val();
+ const newHost=publicState?.hostUid===uid&&Boolean(publicState?.hostToken);
+ if(hostToken&&publicState?.hostToken!==hostToken){hostToken=null;host=false;stopHosting();}
+ host=newHost;
+ if(newHost){hostToken=publicState.hostToken;if(!state&&!hostStarting)beginHosting();}
+ if(prev?.round!==publicState?.round||prev?.phase!==publicState?.phase)selected.clear();
+ if(publicState?.status==='playing'&&prev?.status==='done'&&!publicState.players.some(p=>p.uid===uid))leftRoomView=true;
+ render();updateRecoveryStatus();
+ }));listenerStops.push(onValue(path('members'),snap=>{members=snap.val()||{};render()}));listenerStops.push(onValue(path('presence'),snap=>{presenceOnline=Object.fromEntries(Object.entries(snap.val()||{}).filter(([id,p])=>p?.online).map(([id])=>[id,true]));}));listenerStops.push(onValue(path('private/'+uid+'/hand'),snap=>{
  const nextHand=Array.isArray(snap.val())?snap.val():[];
  const previousHand=ownHand;
  const fingerprint=nextHand.map(c=>c.id).join('|');
@@ -175,11 +295,11 @@ listenerStops.push(onValue(path('public'),snap=>{const prev=publicState;publicSt
  handInitialized=true;
  render();
 }));
-if(create)await shareInvite(true);
+if(create)await shareInvite(true);if(resume)notice('前回のルームに復帰しました。');
 }catch(e){notice('接続できません: '+e.message);room=null;}}
 function code(){const n=new Uint32Array(1);crypto.getRandomValues(n);return String(n[0]%1000000).padStart(6,'0')}
 $('create').onclick=()=>joinRoom(code(),true);$('join').onclick=()=>joinRoom($('roomCode').value,false);
-$('startGame').onclick=async()=>{try{if(!host)throw Error('ホストだけが開始できます');const players=Object.entries(members).sort((a,b)=>a[1].joinedAt-b[1].joinedAt).map(([id,m])=>({uid:id,name:m.name}));if(players.length<2||players.length>5)throw Error('2〜5人で開始してください');if(players[0].uid!==uid){const me=players.find(p=>p.uid===uid);players.splice(players.indexOf(me),1);players.unshift(me);}state=initialGame(players,1,null,null,Number(publicState?.baseRate||50));state.hostUid=uid;await publish();watchActions();}catch(e){notice(e.message)}};
+$('startGame').onclick=async()=>{try{if(!host)throw Error('ホストだけが開始できます');const players=Object.entries(members).sort((a,b)=>a[1].joinedAt-b[1].joinedAt).map(([id,m])=>({uid:id,name:m.name}));if(players.length<2||players.length>5)throw Error('2〜5人で開始してください');if(players[0].uid!==uid){const me=players.find(p=>p.uid===uid);players.splice(players.indexOf(me),1);players.unshift(me);}state=initialGame(players,1,null,null,Number(publicState?.baseRate||50));state.hostUid=uid;hostToken=publicState.hostToken||instanceToken();state.hostToken=hostToken;await publish();watchActions();}catch(e){notice(e.message)}};
 async function sendAction(a){if(!room||!publicState)return;try{await push(path('actions/'+uid),a);}catch(e){notice('操作送信に失敗: '+e.message)}}
 $('discard').onclick=()=>{const indices=[...selected];const cards=indices.map(i=>ownHand[i]);if(!valid(cards)){notice('捨てる組み合わせが不正です');return}sendAction({type:'discard',indices});selected.clear()};$('drawDeck').onclick=()=>sendAction({type:'draw',source:'deck'});$('drawFace').onclick=()=>sendAction({type:'draw',source:'face'});$('yaniv').onclick=()=>sendAction({type:'yaniv'});
 function allPlayersAcknowledged(){return Boolean(state?.status==='done'&&state.result&&state.players.length>=2&&state.players.every(p=>state.result.acks?.[p.uid]===true));}
@@ -195,20 +315,30 @@ async function startNextRound(){
   for(const p of previous)if(exiting[p.uid])board[p.uid]={name:p.name,score:p.score,departed:true};
   // Only the original host owns the live deck. If that host leaves, close the room
   // instead of silently pretending another client has the host's private deck.
-  if(exiting[state.hostUid]||survivors.length<2){
+  if(survivors.length<2){
    state.status='closed';state.phase='closed';
-   state.closedReason=exiting[state.hostUid]?'ホストが退出予約したため部屋を終了しました':'対戦可能な人数が2人未満になりました';
+   state.closedReason='対戦可能な人数が2人未満になりました';
    await publish();notice(state.closedReason);return;
   }
   const startUid=survivors.some(p=>p.uid===nextStarterUid)?nextStarterUid:survivors[0].uid;
   state=initialGame(survivors.map(({uid,name})=>({uid,name})),state.round+1,survivors.map(p=>p.score),startUid,state.baseRate,board);
-  state.hostUid=uid;
+  state.hostUid=uid;state.hostToken=hostToken;
   await publish();
+  if(exiting[uid])await transferHost(survivors[0].uid);
   notice(`${state.players[state.turn]?.name}さんから新しいゲームを開始します`);
  }catch(e){notice('次のゲームの開始に失敗: '+e.message)}finally{startingNext=false;}
 }
+async function transferHost(nextUid){
+ if(!host||!hostToken||!nextUid||nextUid===uid)return;
+ const token=instanceToken();
+ const result=await runTransaction(path('public'),current=>{
+  if(!current||current.hostUid!==uid||current.hostToken!==hostToken)return;
+  current.hostUid=nextUid;current.hostToken=token;current.leaseUntil=serverNow()+LEASE_MS;return current;
+ },{applyLocally:false});
+ if(result.committed){host=false;hostToken=null;stopHosting();}
+}
 function updateCountdown(){const s=publicState;if(s?.status!=='done'||!s.result)return;const rem=Math.max(0,Math.ceil((s.result.endsAt-Date.now())/1000));const acked=s.players.filter(p=>s.result.acks?.[p.uid]).length;$('countdown').textContent=`確認 ${acked}/${s.players.length}人｜全員OKで即開始・自動開始まで あと${rem}秒`;}
-setInterval(()=>{updateCountdown();if(host&&state?.status==='done'&&state.result&&Date.now()>=state.result.endsAt)startNextRound();},250);
+setInterval(()=>{updateCountdown();updateRecoveryStatus();if(host&&state?.status==='done'&&state.result&&Date.now()>=state.result.endsAt)startNextRound();},250);setInterval(()=>{if(host)renewLease();else checkHostHandoff();},3000);
 $('resultOk').onclick=()=>{if(publicState?.status==='done'&&publicState.result&&!publicState.result.acks?.[uid])sendAction({type:'result_ok',round:publicState.round});};
 $('sortHand').onclick=()=>{sortDescending=!sortDescending;render();};
 $('reserveExit').onclick=()=>sendAction({type:'exit_toggle'});
@@ -238,7 +368,7 @@ function showYanivCutin(reflected,tenhou=false){
 }
 
 $('backLobby').onclick=()=>{resetRoomUI('部屋の画面を閉じました');};
-function resetRoomUI(message){listenerStops.forEach(f=>f());listenerStops=[];actionStops.forEach(f=>f());actionStops=[];room=null;host=false;publicState=null;state=null;members={};ownHand=[];handFingerprint='';handInitialized=false;previousHandCount=null;shownResultEffectKey='';leftRoomView=false;if(cutinTimer)clearTimeout(cutinTimer);cutinTimer=null;if(yanivCutinTimer)clearTimeout(yanivCutinTimer);yanivCutinTimer=null;show('luckyCutin',false);show('yanivCutin',false);show('waiting',false);show('game',false);show('roomFinished',false);show('lobby',true);notice(message);}
+function resetRoomUI(message){localStorage.removeItem(ROOM_KEY);if(room){onDisconnect(path('presence/'+uid)).cancel().catch(()=>{});remove(path('presence/'+uid)).catch(()=>{});}if(presenceStop){presenceStop();presenceStop=null;}hostToken=null;stopHosting();listenerStops.forEach(f=>f());listenerStops=[];actionStops.forEach(f=>f());actionStops=[];room=null;host=false;publicState=null;state=null;members={};ownHand=[];handFingerprint='';handInitialized=false;previousHandCount=null;shownResultEffectKey='';leftRoomView=false;if(cutinTimer)clearTimeout(cutinTimer);cutinTimer=null;if(yanivCutinTimer)clearTimeout(yanivCutinTimer);yanivCutinTimer=null;show('luckyCutin',false);show('yanivCutin',false);show('waiting',false);show('game',false);show('roomFinished',false);show('lobby',true);notice(message);}
 $('leaveRoom').onclick=async()=>{
  if(!room||publicState?.status!=='lobby'){notice('対戦中は退出できません');return;}
  const button=$('leaveRoom');button.disabled=true;
@@ -247,7 +377,7 @@ $('leaveRoom').onclick=async()=>{
   // A host may pass lobby ownership before leaving. This needs the new public rule.
   if(host&&ids.length){
    const nextHost=ids.sort((a,b)=>(members[a].joinedAt||0)-(members[b].joinedAt||0))[0];
-   await update(path('public'),{hostUid:nextHost});
+   await update(path('public'),{hostUid:nextHost,hostToken:instanceToken(),leaseUntil:serverNow()+LEASE_MS});
   }
   await remove(path('members/'+uid));
   resetRoomUI('退出しました');
@@ -257,5 +387,16 @@ $('leaveRoom').onclick=async()=>{
   else notice('退出できません: '+(e?.message||String(e)));
  }finally{button.disabled=false;}
 };
-onAuthStateChanged(auth,u=>{if(u){uid=u.uid;$('connection').textContent='接続済み（匿名認証）';show('lobby',true);}});signInAnonymously(auth).catch(e=>{$('connection').textContent='認証エラー: '+e.message;notice('Firebase Authentication の匿名認証を確認してください')});
+onAuthStateChanged(auth,async u=>{
+ if(!u)return;uid=u.uid;$('connection').textContent='接続済み（匿名認証）';
+ show('lobby',true);
+ const last=localStorage.getItem(ROOM_KEY);
+ if(last&&/^[0-9]{6}$/.test(last)){
+  try{const snap=await get(ref(db,'rooms/'+last+'/members/'+uid));
+   if(snap.exists()){$('playerName').value=snap.val().name||'プレイヤー';await joinRoom(last,false,true);}
+   else localStorage.removeItem(ROOM_KEY);
+  }catch(e){notice('自動復帰を確認できません。再接続ボタンを押してください。');}
+ }
+});
+$('retryReconnect').onclick=()=>{const code=room||localStorage.getItem(ROOM_KEY);if(code)joinRoom(code,false,true);else notice('復帰できるルームがありません');};signInAnonymously(auth).catch(e=>{$('connection').textContent='認証エラー: '+e.message;notice('Firebase Authentication の匿名認証を確認してください')});
 </script></body></html>
